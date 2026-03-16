@@ -1,10 +1,10 @@
 # Output Design
 
-How PEN formats tool output for LLM consumption.
+How PEN formats what it sends back to the LLM.
 
 ## Principles
 
-Every PEN tool returns text in `CallToolResult.Content`. The text is designed for LLM consumption first, human readability second.
+Every tool returns text in `CallToolResult.Content`. The text is shaped for LLMs first, humans second.
 
 ```mermaid
 flowchart LR
@@ -25,10 +25,10 @@ flowchart LR
 
 ### Constraints
 
-- **Token budget**: Tools truncate output to stay within reasonable LLM context limits. Large result sets (e.g., 500 network requests) are capped at the top N entries.
-- **No binary data**: Everything is text. Screenshots are base64-encoded PNGs in `mcp.ImageContent`.
-- **No external references**: Output is self-contained. An LLM should never need to "go look at a file" to understand the result.
-- **Structured, not free-form**: Tables and labeled sections, not prose paragraphs. LLMs parse structured text more reliably.
+- **Token budget**: Output is capped to fit LLM context windows. Big result sets (e.g., 500 network requests) get trimmed to the top N.
+- **No binary blobs**: Everything is text. Screenshots are base64 PNGs in `mcp.ImageContent`.
+- **Self-contained**: No "go look at this file" references. The LLM should have everything it needs in the response.
+- **Structured, not prose**: Tables and labeled sections. LLMs parse structured text better than paragraphs.
 
 ## Token Budget Awareness
 
@@ -44,11 +44,11 @@ flowchart LR
 | `pen_console_messages`    | ~30 lines      | 100 lines        |
 | `pen_lighthouse`          | ~50 lines      | 120 lines        |
 
-Tools with unbounded output accept `topN`, `limit`, `last`, or `maxResults` parameters.
+Tools with open-ended output accept `topN`, `limit`, `last`, or `maxResults` to keep things bounded.
 
 ## Format Package
 
-PEN uses `internal/format/output.go` for consistent formatting across all tools.
+PEN uses `internal/format/output.go` for consistent output across tools.
 
 ### Table Builder
 
@@ -97,17 +97,17 @@ out := format.ToolResult("Performance Metrics",
 
 ## Error Output
 
-When a tool fails, the error text follows the same structured approach:
+When a tool fails, the error follows the same structure:
 
-- **What happened** — the error
-- **Why it likely happened** — context
-- **What to do next** — actionable suggestion
+- **What happened** — the error itself
+- **Why** — likely cause
+- **What to do** — a concrete next step
 
 Example: _"HeapProfiler is already in use by another operation. Wait for the current heap snapshot to finish, or call another tool in the meantime."_
 
 ## Workflow Composition
 
-PEN tools are designed to chain. The LLM drives the composition — PEN doesn't enforce workflows.
+PEN tools chain naturally. The LLM picks the order — PEN doesn’t force any particular flow.
 
 ### Tool ID Flow
 
@@ -121,7 +121,7 @@ Some tools produce IDs consumed by downstream tools:
 | `pen_list_sources`      | script ID   | `pen_source_content`, `pen_search_source` |
 | `pen_capture_trace`     | trace path  | `pen_trace_insights`                      |
 
-IDs are opaque strings (or file paths for traces). They remain valid until PEN restarts or the resource is destroyed.
+IDs are opaque strings (or file paths for traces). They stay valid until PEN restarts or the thing they point to disappears.
 
 ## MCP Content Types
 
@@ -143,4 +143,4 @@ Used by `pen_screenshot`:
 &mcp.ImageContent{MIMEType: "image/png", Data: base64String}
 ```
 
-Screenshots are base64-encoded and included directly in the MCP response. The LLM can display or analyze them.
+Screenshots are base64-encoded and embedded directly in the MCP response. The LLM can display or reason about them.

@@ -1,8 +1,8 @@
 # Data Streaming
 
-## Problem
+## The Problem
 
-Some CDP operations produce large payloads:
+Some CDP operations produce serious payloads:
 
 | Operation     | Typical Size | Worst Case |
 | ------------- | ------------ | ---------- |
@@ -11,11 +11,11 @@ Some CDP operations produce large payloads:
 | CPU profile   | 100 KB–5 MB  | 20 MB      |
 | Coverage data | 10–500 KB    | 5 MB       |
 
-Holding these in memory would crash PEN or exhaust the host. PEN streams them to temp files on disk.
+Loading these into memory would crash PEN or eat the host alive. So PEN streams everything to temp files.
 
 ## Heap Snapshot Streaming
 
-CDP delivers heap snapshots as a series of `HeapProfiler.addHeapSnapshotChunk` events, each carrying a string chunk of the JSON data.
+CDP delivers heap snapshots as a stream of `HeapProfiler.addHeapSnapshotChunk` events — each one carries a string chunk of JSON.
 
 ```mermaid
 sequenceDiagram
@@ -43,11 +43,11 @@ sequenceDiagram
     Handler->>-Lock: Release
 ```
 
-Memory usage stays constant regardless of heap size because chunks are written directly to disk.
+Memory stays flat no matter how big the heap gets — chunks go straight to disk.
 
 ## Trace Streaming
 
-Chrome traces use `Tracing.start` with `transferMode: "ReturnAsStream"` and optional gzip compression.
+Chrome traces use `Tracing.start` with `transferMode: "ReturnAsStream"` and optional gzip.
 
 ```mermaid
 sequenceDiagram
@@ -76,9 +76,9 @@ sequenceDiagram
 
 ### Buffer Management
 
-Chrome has a finite trace buffer. PEN listens for `Tracing.bufferUsage` events during capture. If `percentFull > 0.9`, PEN sends a progress warning. If the buffer fills completely, the trace is truncated and PEN notes this in the output.
+Chrome has a finite trace buffer. PEN watches `Tracing.bufferUsage` events during capture. If `percentFull > 0.9`, PEN fires a progress warning. If the buffer fills completely, the trace gets truncated and PEN notes it in the output.
 
-## Temp File Lifecycle
+## Temp Files
 
 All temp files live under `os.TempDir()/pen/`:
 
@@ -92,13 +92,13 @@ Each temp file has a prefix indicating its type (`heap-`, `trace-`, etc.) and a 
 
 ## Progress Notifications
 
-Long-running operations send MCP progress notifications:
+Long-running tools send MCP progress notifications so the client knows things are moving:
 
 ```go
 server.NotifyProgress(ctx, req, bytesWritten, totalBytes, "streaming heap snapshot...")
 ```
 
-This only fires if the MCP client provided a progress token in the request. Safe to call unconditionally — a nil token or nil session is a no-op.
+Fires only if the client sent a progress token in the request. Safe to call every time — a missing token or nil session is a no-op.
 
 ## Data Flow Diagram
 

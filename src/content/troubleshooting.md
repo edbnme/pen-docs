@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Common issues and fixes when using PEN.
+Quick fixes for the most common PEN issues.
 
 ## Connection Issues
 
@@ -8,7 +8,7 @@ Common issues and fixes when using PEN.
 
 **Symptom:** `CDP connect failed: connection refused`
 
-**Fix:** The browser wasn't started with `--remote-debugging-port=9222`. Close all browser windows and background processes, then relaunch:
+**Fix:** The browser wasn’t launched with `--remote-debugging-port=9222`. Kill all browser processes and relaunch:
 
 ```bash
 # macOS
@@ -21,7 +21,7 @@ open -a "Google Chrome" --args --remote-debugging-port=9222
 google-chrome --remote-debugging-port=9222
 ```
 
-Verify: `http://localhost:9222/json` should return a JSON array. If it doesn't load, the browser wasn't fully closed before relaunch.
+Verify: `http://localhost:9222/json` should return a JSON array. If it doesn’t, the browser wasn’t fully killed before relaunch.
 
 **Windows tip:** Open Task Manager (`Ctrl+Shift+Esc`) and end all Chrome/Edge processes before relaunching.
 
@@ -31,13 +31,13 @@ Verify: `http://localhost:9222/json` should return a JSON array. If it doesn't l
 
 **Symptom:** `no targets found`
 
-**Fix:** Open at least one tab in the debug browser. PEN needs a page target to attach to.
+**Fix:** Open a tab. PEN needs at least one page target to work with.
 
 ### Invalid CDP URL
 
 **Symptom:** `invalid CDP URL`
 
-**Fix:** PEN only allows localhost connections (`localhost`, `127.0.0.1`, `::1`). For remote browsers, use SSH tunneling:
+**Fix:** PEN only talks to localhost (`localhost`, `127.0.0.1`, `::1`). For remote browsers, tunnel with SSH:
 
 ```bash
 ssh -L 9222:localhost:9222 user@remote-server
@@ -50,24 +50,25 @@ pen --cdp-url http://localhost:9222
 
 **Cause:** Browser crashed or tab closed during a heap snapshot or trace.
 
-**What PEN does:** Cleans up partial temp files via `defer`, releases domain locks, returns `isError` explaining the disconnection. On the next tool call, PEN attempts to reconnect (up to 3 retries with exponential backoff, 500ms → 10s max).
+**What PEN does:** Cleans up partial temp files via `defer`, releases domain locks, returns `isError` explaining what happened. On the next call, PEN tries to reconnect (up to 3 retries, exponential backoff from 500ms to 10s).
 
 ## IDE Issues
 
 ### `pen: command not found`
 
-**Fix:** The binary isn't on your PATH. Either:
+**Fix:** The binary isn't on your PATH. Either add it, or use the full path in your IDE config:
 
-- Add the binary location to PATH
-- Use the full path in your IDE config: `"command": "/full/path/to/pen"`
+```json
+"command": "/full/path/to/pen"
+```
 
 ### IDE doesn't see PEN tools
 
-**Fix:** Restart your IDE after editing MCP config files. Most editors don't hot-reload MCP server configurations.
+**Fix:** Restart your editor. Most IDEs don’t hot-reload MCP configs.
 
 ### PEN doesn't respond
 
-**Fix:** Check the MCP output panel in your IDE. PEN logs go to stderr. Look for connection errors or startup failures.
+**Fix:** Check the MCP output panel. PEN logs to stderr — look for connection errors or startup failures there.
 
 ## Tool-Specific Issues
 
@@ -75,7 +76,7 @@ pen --cdp-url http://localhost:9222
 
 **Symptom:** `pen_heap_snapshot has a 10s cooldown. Try again in 6s`
 
-**Fix:** Wait for the cooldown to expire. Rate limits exist to prevent resource exhaustion:
+**Fix:** Wait it out. Rate limits prevent resource exhaustion:
 
 | Tool                  | Cooldown |
 | --------------------- | -------- |
@@ -87,9 +88,9 @@ pen --cdp-url http://localhost:9222
 
 **Symptom:** `HeapProfiler is already in use by another operation`
 
-**Cause:** Two tools tried to use the same exclusive CDP domain simultaneously. For example, calling `pen_cpu_profile` while `pen_capture_trace` is still running.
+**Cause:** Two tools tried to use the same exclusive CDP domain at once (e.g., `pen_cpu_profile` while `pen_capture_trace` is still running).
 
-**Fix:** Wait for the first operation to finish. PEN uses domain-exclusive locking to prevent corrupted results — this is intentional.
+**Fix:** Let the first operation finish. PEN uses domain-level locks to keep results clean — this is by design.
 
 ### Lighthouse not found
 
@@ -101,7 +102,7 @@ pen --cdp-url http://localhost:9222
 npm install -g lighthouse
 ```
 
-All other 29 PEN tools work without Lighthouse. Only `pen_lighthouse` requires it.
+Every other PEN tool works without Lighthouse. Only `pen_lighthouse` needs it.
 
 ### Lighthouse timeout
 
@@ -117,9 +118,9 @@ All other 29 PEN tools work without Lighthouse. Only `pen_lighthouse` requires i
 
 **Symptom:** `Large heap detected. Analysis limited to top retainers.`
 
-**Cause:** The heap snapshot is very large (>500 MB). Enterprise SPAs with massive data stores can produce these.
+**Cause:** The heap is huge (>500 MB). Big enterprise SPAs can do this.
 
-**What PEN does:** Continues streaming to disk (constant memory usage — PEN never holds the snapshot in memory). Limits analysis depth to avoid performance issues. The snapshot data is still complete.
+**What PEN does:** Keeps streaming to disk (constant memory — the snapshot never sits in RAM). Limits analysis depth to stay fast. The raw data is still complete.
 
 ### Trace buffer overflow
 
@@ -145,7 +146,7 @@ pen_capture_trace with duration=3 (shorter)
 
 **Symptom:** `Trace file is X MB — exceeds the 100 MB limit`
 
-**Fix:** `pen_trace_insights` has a 100 MB limit to prevent unbounded memory usage during JSON parsing. Capture shorter traces or use fewer categories.
+**Fix:** `pen_trace_insights` caps at 100 MB to avoid blowing up during JSON parsing. Record shorter traces or use fewer categories.
 
 ## Page and Navigation Issues
 
@@ -164,7 +165,7 @@ pen_capture_trace with duration=3 (shorter)
 
 **Cause:** Attempted to navigate to a `javascript:`, `data:`, `file:`, or other non-HTTP URL.
 
-**Fix:** This is a security feature. Only `http:` and `https:` URLs are allowed for `pen_navigate` and `pen_lighthouse`.
+**Fix:** This is a security feature. Only HTTP and HTTPS URLs are allowed for navigation and Lighthouse.
 
 ### No forward history
 
@@ -180,9 +181,9 @@ pen_capture_trace with duration=3 (shorter)
 
 **Symptom:** Expression blocked by the security filter when using `pen_evaluate`.
 
-**Cause:** The expression matched one of PEN's blocked patterns (`fetch`, `document.cookie`, `eval`, `localStorage`, etc.).
+**Cause:** The expression hit one of PEN’s blocklist patterns (`fetch`, `document.cookie`, `eval`, `localStorage`, etc.).
 
-**Fix:** This is intentional. See [Security](/docs/security) for the full blocklist.
+**Fix:** That’s intentional. See [Security](/docs/security) for the full list.
 
 ### Path access denied
 

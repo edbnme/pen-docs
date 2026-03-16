@@ -73,11 +73,11 @@ internal/
 | `github.com/charmbracelet/huh`           | v1.0.0  | Interactive terminal wizard (`pen init`) |
 | `github.com/charmbracelet/lipgloss`      | v1.1.0  | Terminal styling for `pen init` output   |
 
-Go version: **1.24.2**. No other runtime dependencies beyond the standard library.
+Go version: **1.24.2**. No runtime dependencies beyond the standard library and the above.
 
 ## Entry Point Flow
 
-From `cmd/pen/main.go`:
+From `cmd/pen/main.go`, here’s what happens on launch:
 
 ```mermaid
 flowchart TD
@@ -95,19 +95,19 @@ flowchart TD
     Cleanup --> Done
 ```
 
-1. Check for `"init"` subcommand → runs interactive wizard via `charmbracelet/huh`
+1. Check for the `"init"` subcommand — if present, run the interactive wizard
 2. Parse flags (`--cdp-url`, `--transport`, `--addr`, `--allow-eval`, `--project-root`, `--log-level`)
-3. Validate CDP URL via `security.ValidateCDPURL` (localhost-only)
-4. Set up signal context (`SIGINT`, `SIGTERM`)
-5. Create CDP client with retry: `cdp.NewClient(url, logger)` → `client.Reconnect(ctx, 3)` (3 attempts, exponential backoff 500ms → 10s max)
-6. Create MCP server: `server.New(cdpClient, &Config{...})`
+3. Validate the CDP URL via `security.ValidateCDPURL` (localhost only)
+4. Wire up signal handling (`SIGINT`, `SIGTERM`)
+5. Connect to Chrome with retry: `cdp.NewClient(url, logger)` → `client.Reconnect(ctx, 3)` (3 attempts, backoff from 500ms to 10s)
+6. Stand up the MCP server: `server.New(cdpClient, &Config{...})`
 7. Register all 30 tools: `tools.RegisterAll(server.Server(), deps)`
-8. Start server with configured transport
-9. Clean up temp directory on exit (deferred)
+8. Start serving on the configured transport
+9. Clean up temp files on exit (deferred)
 
 ## Data Flow
 
-A typical tool call flows through these layers:
+Here’s what a typical tool call looks like end-to-end:
 
 ```mermaid
 sequenceDiagram
@@ -258,7 +258,7 @@ if err != nil {
 defer release()
 ```
 
-The lock is a per-domain mutex. If a second tool tries to acquire a locked domain, it returns an immediate error — PEN never queues or waits.
+The lock is a simple per-domain mutex. If a second tool tries to grab a locked domain, it fails immediately — PEN never queues or blocks.
 
 ### Rate Limiting
 
@@ -272,7 +272,7 @@ if err := deps.Limiter.Check("pen_heap_snapshot"); err != nil {
 
 ### Context Propagation
 
-Every handler receives `context.Context` from MCP. If the client disconnects mid-operation:
+Every handler gets a `context.Context` from MCP. If the client disconnects mid-operation:
 
 1. `ctx.Done()` fires
 2. CDP operations abort (chromedp respects context)

@@ -1,6 +1,6 @@
 # Error Handling & Edge Cases
 
-How PEN handles failures across CDP, MCP, and browser interactions.
+How PEN deals with failures across CDP, MCP, and browser interactions.
 
 ```mermaid
 flowchart TD
@@ -22,40 +22,40 @@ flowchart TD
 
 ### Browser Not Running
 
-If PEN can't connect to `--remote-debugging-port`:
+If PEN can’t reach `--remote-debugging-port`:
 
 ```
 pen: cannot reach Chrome at ws://127.0.0.1:9222
 Start Chrome with: chrome --remote-debugging-port=9222
 ```
 
-**What happens internally**: `chromedp.NewRemoteAllocator` fails → PEN exits with a non-zero code before starting the MCP server.
+**What happens:** `chromedp.NewRemoteAllocator` fails → PEN exits with a non-zero code before the MCP server even starts.
 
 ### Browser Disconnects Mid-Session
 
-If Chrome closes while PEN is running:
+If Chrome dies while PEN is running:
 
-1. The underlying WebSocket drops
-2. CDP calls return `context.Canceled`
-3. PEN wraps the error and returns it to the LLM
-4. PEN does **not** crash — it remains running and reports the error
+1. The WebSocket drops
+2. CDP calls come back with `context.Canceled`
+3. PEN wraps the error and sends it to the LLM
+4. PEN itself stays up — it doesn’t crash
 
-The LLM can instruct the user to restart Chrome and reconnect.
+The LLM can tell the user to restart Chrome.
 
 ### Target Disappears
 
-If a tab is closed while a tool is operating on it:
+If a tab gets closed while a tool is working on it:
 
-- The active CDP context becomes invalid
-- Subsequent CDP calls on that target fail
-- `pen_list_pages` still works (it queries the browser, not a specific target)
-- The LLM should call `pen_list_pages` → `pen_select_page` to switch to a valid target
+- The active CDP context goes stale
+- CDP calls on that target start failing
+- `pen_list_pages` still works (it queries the browser, not a specific tab)
+- The LLM should call `pen_list_pages` → `pen_select_page` to pick a live target
 
 ## Network & Resource Errors
 
 ### Large Payloads
 
-Network response bodies can be very large. PEN handles this:
+Network response bodies can be big. Here’s how PEN handles the edge cases:
 
 | Scenario               | Handling                                       |
 | ---------------------- | ---------------------------------------------- |
@@ -66,34 +66,34 @@ Network response bodies can be very large. PEN handles this:
 
 ### Source Map Failures
 
-`pen_source_content` may encounter missing or invalid source maps:
+`pen_source_content` may hit missing or busted source maps:
 
 - **Missing source map**: PEN serves the minified source as-is
-- **Invalid source map URL**: Logged and skipped, minified source returned
-- **Cross-origin source map**: Cannot be fetched via CDP; minified source returned
+- **Bad source map URL**: Logged, skipped, minified source returned
+- **Cross-origin source map**: Can’t fetch via CDP; minified source returned
 
-PEN does not fail on source map issues — it degrades gracefully.
+PEN doesn’t blow up on source map problems — it degrades gracefully.
 
 ## MCP Protocol Errors
 
 ### Invalid Parameters
 
-If the LLM sends invalid parameters (wrong type, missing required field):
+If the LLM sends bad parameters (wrong type, missing required field):
 
-- The MCP SDK validates against the JSON Schema
-- Returns a standard MCP error with code `-32602` (Invalid params)
-- PEN tool handlers also validate inputs and return descriptive `CallToolResult` errors
+- The SDK validates against the JSON Schema
+- Returns MCP error code `-32602` (Invalid params)
+- PEN handlers also validate and return descriptive errors
 
 ### Unknown Tool
 
-If the LLM calls a tool that doesn't exist:
+If the LLM calls a tool that doesn’t exist:
 
-- The MCP SDK returns code `-32601` (Method not found)
-- No PEN code is involved
+- The SDK returns code `-32601` (Method not found)
+- PEN code isn’t involved
 
 ### Concurrent Tool Calls
 
-The MCP protocol allows concurrent tool calls. PEN handles this with `OperationLock`:
+MCP allows concurrent tool calls. PEN handles this with `OperationLock`:
 
 ```go
 type OperationLock struct {
@@ -102,7 +102,7 @@ type OperationLock struct {
 }
 ```
 
-Locks are keyed by CDP domain — multiple tools can run concurrently as long as they use different domains. If two tools that need the same exclusive CDP domain are called simultaneously:
+Locks are keyed by CDP domain — tools that use different domains can run in parallel. If two tools need the same exclusive domain at once:
 
 1. The first caller acquires the domain lock
 2. The second caller gets an immediate error: _"HeapProfiler is already in use by another operation. Wait for the current heap snapshot to finish, or call another tool in the meantime."_
@@ -110,14 +110,14 @@ Locks are keyed by CDP domain — multiple tools can run concurrently as long as
 
 Exclusive domains and their tools:
 
-| Domain                | Tools                                                                     |
-| --------------------- | ------------------------------------------------------------------------- |
-| `HeapProfiler`        | `pen_heap_snapshot`, `pen_heap_diff`                                      |
-| `HeapProfiler.tracking` | `pen_heap_track`                                                       |
-| `Profiler`            | `pen_cpu_profile`, `pen_js_coverage`                                      |
-| `Tracing`             | `pen_capture_trace`                                                       |
-| `CSS`                 | `pen_css_coverage`                                                        |
-| `Lighthouse`          | `pen_lighthouse`                                                          |
+| Domain                  | Tools                                |
+| ----------------------- | ------------------------------------ |
+| `HeapProfiler`          | `pen_heap_snapshot`, `pen_heap_diff` |
+| `HeapProfiler.tracking` | `pen_heap_track`                     |
+| `Profiler`              | `pen_cpu_profile`, `pen_js_coverage` |
+| `Tracing`               | `pen_capture_trace`                  |
+| `CSS`                   | `pen_css_coverage`                   |
+| `Lighthouse`            | `pen_lighthouse`                     |
 
 Tools that **don't** need a lock: `pen_console_messages`, `pen_list_pages`, `pen_select_page`, `pen_screenshot`, `pen_network_waterfall`, `pen_performance_metrics`, `pen_web_vitals`, `pen_accessibility_check`, `pen_status`.
 
@@ -133,7 +133,7 @@ type RateLimiter struct {
 }
 ```
 
-Each rate-limited tool has a minimum cooldown period between invocations:
+Each rate-limited tool has a minimum gap between calls:
 
 | Tool                  | Cooldown |
 | --------------------- | -------- |
@@ -141,9 +141,9 @@ Each rate-limited tool has a minimum cooldown period between invocations:
 | `pen_capture_trace`   | 5s       |
 | `pen_collect_garbage` | 5s       |
 
-When a tool is called within its cooldown window, `Check` returns an error with the remaining wait time (e.g., _"pen_heap_snapshot has a 10s cooldown. Try again in 6s"_). All other tools have no cooldown.
+When a call lands inside the cooldown window, `Check` returns an error with the remaining wait time (e.g., _"pen_heap_snapshot has a 10s cooldown. Try again in 6s"_). Everything else has no cooldown.
 
-Rate limits protect against resource exhaustion from runaway LLM loops.
+Rate limits exist to stop runaway LLM loops from hammering expensive operations.
 
 ## Input Validation
 
@@ -161,75 +161,75 @@ Validation functions live in `internal/security/validate.go`.
 
 ## Heap Profiling Edge Cases
 
-### Snapshot While Navigating
+### Snapshot During Navigation
 
-If `pen_heap_snapshot` is called during a navigation:
+If `pen_heap_snapshot` fires during a page navigation:
 
-- The snapshot may capture a partially-constructed heap
-- PEN does not prevent this — the result will be returned with whatever state the heap is in
-- For accurate snapshots, the LLM should wait for navigation to complete
+- The snapshot might catch a half-built heap
+- PEN doesn’t prevent this — you get whatever state the heap is in
+- For clean snapshots, wait for navigation to finish
 
-### Diff With Mismatched Snapshots
+### Diffing Mismatched Snapshots
 
-`pen_heap_diff` compares two snapshot IDs. Edge cases:
+`pen_heap_diff` compares two snapshot IDs. Some edge cases:
 
-- **Same snapshot twice**: Returns a diff of zero changes
-- **Invalid snapshot ID**: Returns an error
-- **Snapshot from different page**: Works, but the diff may not be meaningful
+- **Same snapshot twice**: Returns zero changes
+- **Bad snapshot ID**: Returns an error
+- **Snapshot from a different page**: Works, but the diff probably won’t mean much
 
 ## Lighthouse Edge Cases
 
-### Lighthouse Cache
+### Lighthouse Caching
 
-`pen_lighthouse` runs Chrome's built-in Lighthouse. Considerations:
+`pen_lighthouse` runs Lighthouse via Chrome. Keep in mind:
 
-- First run may be slower (cold cache)
-- Results vary between runs (network timing, CPU load)
-- PEN returns the raw Lighthouse scores without averaging
+- First run can be slow (cold cache)
+- Scores fluctuate between runs (network jitter, CPU load)
+- PEN returns raw scores, no averaging
 
 ### Page Requires Authentication
 
-If the current page requires authentication:
+If the page needs a login:
 
-- Lighthouse navigates the page fresh, losing session state
-- Scores reflect the unauthenticated page (often a login redirect)
-- The LLM should ensure the user is logged in and has navigated to the target page
+- Lighthouse navigates fresh, losing the session
+- You’ll get scores for the login redirect, not the actual page
+- Make sure the user is already logged in and on the right page
 
-## Console Overflow
+## Console Buffer
 
-`pen_console_messages` stores messages in memory:
+`pen_console_messages` keeps messages in memory:
 
-- Messages accumulate from page load onward
-- A `last` parameter limits how many are returned (max 200)
-- Clearing: use `pen_console_messages` with `clear=true` to reset the buffer
-- Very noisy pages (thousands of messages) may use significant memory
+- Messages pile up from page load onward
+- The `last` param caps how many come back (max 200)
+- Use `clear=true` to flush the buffer
+- Noisy pages (thousands of logs) can eat memory
 
 ## Trace Collection Edge Cases
 
 ### Trace File Size
 
-Trace files are written to a temp directory:
+Trace files land in the temp directory:
 
-- Small pages: 1-5 MB
-- Complex SPA: 10-50 MB
-- Long-running traces: 100+ MB possible
+- Small pages: 1–5 MB
+- Complex SPAs: 10–50 MB
+- Long recordings: 100+ MB is possible
 
-`pen_capture_trace` accepts a `duration` parameter (default: 5 seconds). Keep it short for manageable file sizes.
+`pen_capture_trace` takes a `duration` param (default: 5s). Keep it short for sane file sizes.
 
 ### Temp File Cleanup
 
-Trace files are stored in `os.TempDir()`:
+Trace files live in `os.TempDir()`:
 
-- PEN does not clean them up automatically
-- They persist until the OS clears temp files or the user removes them
-- The file path is returned to the LLM, which can inform the user
+- PEN doesn’t auto-delete them
+- They stick around until the OS cleans temp or you remove them manually
+- The file path is returned to the LLM, which can let the user know
 
 ## Recovery Patterns
 
-When PEN encounters an error, it follows these principles:
+When something goes wrong, PEN follows these rules:
 
-1. **Never crash**: PEN stays running. Errors are returned as tool results.
-2. **Be specific**: Error messages include what happened and what to do next.
-3. **Degrade gracefully**: Partial results are better than no results (e.g., truncated payloads, missing source maps).
-4. **Reset state**: Operations clean up after themselves, even on failure (defer patterns in Go).
-5. **Let the LLM decide**: PEN reports the problem. The LLM decides what to try next.
+1. **Never crash**: PEN stays up. Errors go back as tool results.
+2. **Be specific**: Say what happened and what to do about it.
+3. **Degrade gracefully**: Partial results beat no results (truncated payloads, missing source maps, etc.).
+4. **Clean up after yourself**: Every operation resets its own state, even on failure (`defer` in Go).
+5. **Let the LLM decide**: PEN reports the problem. The LLM figures out what’s next.

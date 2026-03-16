@@ -1,8 +1,8 @@
 # PEN
 
-MCP server that connects AI assistants to Chrome DevTools. Ask your AI to profile a page, find a memory leak, or measure coverage — PEN runs the browser profiling and returns structured results.
+MCP server for browser performance profiling. Tell your AI to profile a page, hunt down a memory leak, or check code coverage — PEN does the DevTools work and hands back structured results.
 
-Single Go binary. No Node.js. No browser launch. Attach to your dev browser and go.
+One Go binary. No Node.js. No browser launch. Just attach to your running browser.
 
 ## How It Works
 
@@ -12,21 +12,21 @@ flowchart LR
     PEN -->|"CDP (WebSocket)"| Chrome[Chrome]
 ```
 
-Your IDE (VS Code, Cursor, Claude Desktop) spawns PEN as a child process. When an LLM calls a tool like `pen_heap_snapshot`, PEN translates it to Chrome DevTools Protocol commands, streams results to disk, and returns structured analysis the LLM can interpret.
+Your editor spawns PEN as a child process. When the LLM calls something like `pen_heap_snapshot`, PEN fires the right Chrome DevTools Protocol commands, streams data to disk, and sends back analysis the LLM can act on.
 
 ## What You Can Do
 
-| Category       | What it does                                                               | Tools   |
-| -------------- | -------------------------------------------------------------------------- | ------- |
-| **Memory**     | Heap snapshots, diff two snapshots for leak detection, allocation tracking | 4 tools |
-| **CPU**        | CPU profiling, Chrome traces, offline trace analysis                       | 3 tools |
-| **Network**    | Request capture, waterfall view, render-blocking detection                 | 4 tools |
-| **Coverage**   | JavaScript and CSS code coverage with unused byte analysis                 | 2 tools |
-| **Audit**      | Performance metrics, Core Web Vitals, accessibility scan                   | 3 tools |
-| **Source**     | List loaded scripts, retrieve source, search across all scripts            | 3 tools |
-| **Console**    | Real-time console message capture and filtering                            | 2 tools |
-| **Lighthouse** | Full Lighthouse audits (requires CLI)                                      | 1 tool  |
-| **Utility**    | Navigation, screenshots, eval, device emulation, tab management            | 8 tools |
+| Category       | What it does                                                           | Tools   |
+| -------------- | ---------------------------------------------------------------------- | ------- |
+| **Memory**     | Heap snapshots, snapshot diffs for leak detection, allocation tracking | 4 tools |
+| **CPU**        | CPU profiling, Chrome traces, offline trace analysis                   | 3 tools |
+| **Network**    | Request capture, waterfall, render-blocking detection                  | 4 tools |
+| **Coverage**   | JS and CSS coverage with unused byte breakdown                         | 2 tools |
+| **Audit**      | Performance metrics, Core Web Vitals, accessibility                    | 3 tools |
+| **Source**     | List scripts, grab source, search across all loaded scripts            | 3 tools |
+| **Console**    | Live console capture and filtering                                     | 2 tools |
+| **Lighthouse** | Full Lighthouse audits (needs the CLI)                                 | 1 tool  |
+| **Utility**    | Navigation, screenshots, eval, device emulation, tab switching         | 8 tools |
 
 30 tools total. See the full [Tool Reference](/docs/tool-catalog).
 
@@ -40,7 +40,7 @@ curl -fsSL https://raw.githubusercontent.com/edbnme/pen/main/install.sh | sh
 pen init
 ```
 
-`pen init` auto-detects your environment, lets you pick your IDE and browser, generates the MCP config, and verifies the connection — all in one command.
+`pen init` detects your browser and IDE, writes the MCP config, and verifies the connection.
 
 Or install via package managers:
 
@@ -70,7 +70,7 @@ PEN connects to Chrome, runs `pen_performance_metrics` via CDP, and returns:
 └
 ```
 
-The LLM reads this, identifies the high heap usage and slow script duration, and suggests fixes — all without you touching DevTools.
+The LLM spots the high heap and slow scripts, then suggests fixes. You never open DevTools.
 
 ## Key Design Decisions
 
@@ -86,7 +86,7 @@ The LLM reads this, identifies the high heap usage and slow script duration, and
 
 Google maintains [`chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp) — a general DevTools MCP server for navigation, DOM, screenshots, network, traces, memory, and Lighthouse.
 
-PEN is performance-focused: differential heap analysis (multi-snapshot leak detection), streaming architecture for multi-GB payloads, Go single binary (no Node.js runtime), and every tool designed to answer "why is this slow?" rather than "what's on the page?". The two can complement each other.
+PEN is built for performance work: multi-snapshot heap diffs for leak detection, streaming for multi-GB payloads, no Node.js runtime, and every tool aimed at "why is this slow?" rather than "what's on the page?". They complement each other.
 
 ## Docs
 

@@ -1,12 +1,12 @@
 # References
 
-Sources, specifications, and prior art referenced during PEN's development.
+Specs, libraries, and prior art that shaped PEN.
 
 ## Core Specifications
 
 ### Chrome DevTools Protocol
 
-The CDP spec defines every domain PEN uses:
+The CDP spec covers every domain PEN talks to:
 
 | Domain         | Purpose                                  | Reference                                                                                                                          |
 | -------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -37,31 +37,31 @@ The CDP spec defines every domain PEN uses:
 | `github.com/charmbracelet/huh`           | v1.0.0       | Interactive terminal wizard (`pen init`) |
 | `github.com/charmbracelet/lipgloss`      | v1.1.0       | Terminal output styling                  |
 
-All versions are from [go.mod](https://github.com/nicholasgasior/pen/blob/main/go.mod). PEN requires Go 1.24.2+.
+All versions pulled from [go.mod](https://github.com/nicholasgasior/pen/blob/main/go.mod). Requires Go 1.24.2+.
 
 ## Prior Art
 
-Tools and projects that informed PEN's design:
+Tools and projects that influenced PEN:
 
 | Tool                | Relationship to PEN                                                      |
 | ------------------- | ------------------------------------------------------------------------ |
-| **Chrome DevTools** | PEN exposes the same browser internals, but through MCP instead of a GUI |
+| **Chrome DevTools** | PEN exposes the same browser internals, but over MCP instead of a GUI    |
 | **Puppeteer**       | Node.js CDP library; PEN uses chromedp (Go) for the same protocol        |
-| **Playwright**      | Multi-browser automation; PEN focuses on Chrome-only MCP integration     |
-| **Lighthouse CLI**  | PEN wraps CDP audit domains rather than shelling out to Lighthouse       |
-| **web-vitals**      | Client-side metrics; PEN collects the same metrics server-side via CDP   |
+| **Playwright**      | Multi-browser automation; PEN is Chrome-only, MCP-native                 |
+| **Lighthouse CLI**  | PEN wraps CDP audit domains directly rather than shelling out            |
+| **web-vitals**      | Client-side metrics library; PEN grabs the same data server-side via CDP |
 
 ## Architecture References
 
-- **Go concurrency patterns**: `sync.Mutex` for operation locks, `context.Context` for cancellation, goroutines for event listeners
-- **Graceful degradation**: Partial results preferred over hard failures (see [Error Handling](/docs/error-handling))
-- **Token-aware output**: All tool output designed for LLM context windows (see [Output Design](/docs/output-design))
+- **Go concurrency**: `sync.Mutex` for operation locks, `context.Context` for cancellation, goroutines for event listeners
+- **Graceful degradation**: Partial results over hard failures (see [Error Handling](/docs/error-handling))
+- **Token-aware output**: Everything shaped for LLM context windows (see [Output Design](/docs/output-design))
 
 ## Project Links
 
-| Resource      | URL                                                                    |
-| ------------- | ---------------------------------------------------------------------- |
-| Source code   | [github.com/edbnme/pen](https://github.com/edbnme/pen)    |
+| Resource      | URL                                                        |
+| ------------- | ---------------------------------------------------------- |
+| Source code   | [github.com/edbnme/pen](https://github.com/edbnme/pen)     |
 | Documentation | [pen-docs (this site)](https://github.com/edbnme/pen-docs) |
 | Go module     | `github.com/edbnme/pen`                                    |
 | License       | MIT                                                        |

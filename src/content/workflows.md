@@ -1,6 +1,6 @@
 # Workflows
 
-PEN tools are designed to chain. The LLM drives the composition — PEN doesn't enforce workflows. These are proven patterns for common performance investigations.
+PEN tools chain together naturally. The LLM decides what to run and in what order — PEN doesn’t enforce any particular flow. These are patterns that work well for common investigations.
 
 ## Memory Leak Investigation
 
@@ -18,9 +18,9 @@ flowchart LR
 4. Take snapshot B
 5. Diff the two snapshots — PEN shows new objects, grown objects, and total delta
 
-The diff output highlights retained objects that grew between snapshots, which are your leak candidates. The LLM can then suggest the root cause based on the object types and retainer chains.
+The diff highlights retained objects that grew between the two snapshots — those are your leak suspects. From there, the LLM can reason about the object types and suggest what’s holding the reference.
 
-> **Tip:** For allocation tracking over time (without two manual snapshots), use `pen_heap_track` with `action: "start"`, reproduce the issue, then `action: "stop"`.
+> **Tip:** If you'd rather track allocations over time instead of taking two manual snapshots, use `pen_heap_track` with `action: "start"`, reproduce the problem, then `action: "stop"`.
 
 ## Page Load Optimization
 
@@ -38,7 +38,7 @@ flowchart LR
 4. Check the network waterfall for large assets, slow requests, and render-blocking resources
 5. Measure Core Web Vitals for the final score
 
-This gives the LLM a complete picture: trace-level timing, network bottlenecks, and the actual Web Vitals numbers all in one flow.
+That gives the LLM the full picture: trace-level timing, network bottlenecks, and Web Vitals scores in one pass.
 
 ## Console Debugging
 
@@ -52,7 +52,7 @@ flowchart LR
 2. Have the user reproduce the issue
 3. Pull error messages — filtering by `level=error` keeps noise down
 
-Console messages include source URLs, line numbers, and stack traces for exceptions. The buffer holds up to 1,000 messages; oldest 100 are evicted when full.
+Console entries include source URLs, line numbers, and stack traces for exceptions. Buffer holds 1,000 messages; oldest 100 get evicted when it fills up.
 
 ## Full Page Audit
 
@@ -68,7 +68,7 @@ flowchart LR
 3. Capture a trace for the detailed timeline
 4. Analyze the trace to pinpoint exactly what Lighthouse flagged
 
-Lighthouse tells you _what's wrong_; trace insights tell you _why_ and _where_ in the execution timeline.
+Lighthouse tells you _what’s wrong_. The trace tells you _why_ and _where_ in the timeline.
 
 ## Bundle Audit
 
@@ -86,7 +86,7 @@ flowchart LR
 3. Stop JS coverage — see which scripts have the most unused bytes
 4. Repeat for CSS coverage
 
-This identifies dead code. The LLM can recommend code splitting or tree-shaking based on the unused byte percentages.
+This surfaces dead code. The LLM can then recommend code splitting or tree-shaking based on what’s unused.
 
 ## Multi-Tab Profiling
 
@@ -102,7 +102,7 @@ flowchart LR
 3. Profile CPU on that tab
 4. Grab performance metrics
 
-Useful when your app spans multiple tabs or you need to compare performance across different pages.
+Handy when your app spans multiple tabs or you need to compare performance across pages.
 
 ## Trace-Driven Analysis
 
@@ -111,7 +111,7 @@ flowchart LR
     A[pen_capture_trace] --> B[pen_trace_insights]
 ```
 
-Capture a raw trace file, then hand it to `pen_trace_insights` for a structured breakdown. No need to leave the MCP conversation to analyze the trace manually. The insights include:
+Record a raw trace, then feed it to `pen_trace_insights` for a structured breakdown. No need to leave the conversation to analyze the file. You get:
 
 - Long tasks (>50ms threshold)
 - Layout shifts (CLS contributors)
@@ -171,4 +171,4 @@ flowchart LR
 | `pen_list_sources`      | script ID   | `pen_source_content`, `pen_search_source` |
 | `pen_capture_trace`     | trace path  | `pen_trace_insights`                      |
 
-IDs are opaque strings (or file paths for traces). They remain valid until PEN restarts or the referenced resource is destroyed (tab closed, page navigated, etc.).
+IDs are opaque strings (or file paths for traces). They stay valid until PEN restarts or the thing they reference goes away (tab closed, page navigated, etc.).

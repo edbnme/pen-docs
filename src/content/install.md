@@ -7,13 +7,13 @@
 
 That's it. No Go, no Node.js — just download the binary.
 
-**Optional:** For `pen_lighthouse` (full Lighthouse audits), install the Lighthouse CLI:
+**Optional:** The `pen_lighthouse` tool needs the Lighthouse CLI:
 
 ```bash
 npm install -g lighthouse
 ```
 
-All other 29 PEN tools work without it.
+All other 29 tools work without it.
 
 ## Quick Install (Recommended)
 
@@ -35,15 +35,30 @@ pen init
 
 ### The `pen init` Wizard
 
-`pen init` is an interactive terminal wizard (built with [charmbracelet/huh](https://github.com/charmbracelet/huh)) that walks you through the complete setup:
+`pen init` is a full interactive setup wizard powered by [charmbracelet/huh](https://github.com/charmbracelet/huh). It handles everything — detecting what's on your machine, asking a few questions, and writing the config files so you don't have to.
 
-1. **IDE selection** — picks VS Code, Cursor, or Claude Desktop
-2. **Browser detection** — finds Chrome, Edge, or Brave on your system
-3. **Config generation** — writes the correct MCP config file for your IDE
-4. **Browser launch** — optionally starts your browser with the debug flag
-5. **Connection test** — verifies PEN can reach Chrome's debug port
+**Phase 1 — Environment scan.** PEN detects your OS and architecture, then searches for installed Chromium browsers (Chrome, Edge, Brave) and MCP-capable IDEs (VS Code, Cursor, Claude Desktop). On macOS it checks `/Applications`, on Windows it checks Program Files and LocalAppData, on Linux it uses `$PATH`.
 
-Run it after any install method. It handles everything.
+**Phase 2 — Interactive config.** A form-based TUI asks you to:
+
+- Pick your IDE (detected ones appear first, with a "skip" option)
+- Pick your browser
+- Set the CDP port (defaults to `9222`)
+- Enable or disable `pen_evaluate` (disabled by default — it lets PEN run JavaScript in the browser)
+
+**Phase 3 — Write the config.** PEN generates the correct MCP config for your IDE:
+
+- **VS Code** → `.vscode/mcp.json` (key: `"servers"`)
+- **Cursor** → `.cursor/mcp.json` (key: `"mcpServers"`)
+- **Claude Desktop** → platform-specific path (key: `"mcpServers"`)
+
+If a config already exists, PEN asks before overwriting. Other server entries in the file are preserved.
+
+**Phase 4 — Launch the browser.** Optionally opens your browser with `--remote-debugging-port` set. If PEN can't launch it automatically, it prints the exact command for your OS.
+
+**Phase 5 — Verify the connection.** Tests `http://localhost:PORT/json` and reports how many tabs are open. If it can't connect yet, that's fine — PEN connects when your IDE starts it.
+
+Works after any install method.
 
 ## Package Managers
 
@@ -102,7 +117,7 @@ pen --version
 
 ## Start Your Browser
 
-Quit the browser **completely** first — close all windows, check the system tray (Windows) or Activity Monitor (macOS) for background processes. The debug port only works if Chrome starts fresh with the flag.
+Close the browser **all the way** first — every window, every background process. The debug port only works when Chrome launches fresh with the flag.
 
 **macOS:**
 
@@ -128,11 +143,11 @@ google-chrome --remote-debugging-port=9222
 
 **Verify:** open `http://localhost:9222/json` in a new tab — you should see a JSON array of open tabs.
 
-> **Still not loading?** The browser wasn't fully closed before relaunch. On Windows, open Task Manager (`Ctrl+Shift+Esc`) and end all Chrome/Edge processes. On macOS, run `killall "Google Chrome"` then relaunch.
+> **Still stuck?** The browser wasn't fully killed before relaunch. On Windows, hit `Ctrl+Shift+Esc` and end all Chrome/Edge processes. On macOS, `killall "Google Chrome"` and try again.
 
 ## Configure Your IDE
 
-PEN runs as a child process of your editor — configure it once and the editor handles launching.
+PEN runs as a child process of your editor. Configure it once, then forget about it.
 
 ### VS Code + GitHub Copilot
 
@@ -192,4 +207,4 @@ Claude Desktop doesn't support `${workspaceFolder}` — use the full path.
 2. Open a page in that browser
 3. Ask your AI: _"Check the performance metrics of this page"_
 
-PEN connects to the browser, runs the profiling, and returns results. Logs go to stderr — check the MCP output panel in your IDE if something looks wrong.
+PEN connects, runs the profiling, and hands back results. If something goes wrong, check the MCP output panel in your IDE — PEN logs to stderr.

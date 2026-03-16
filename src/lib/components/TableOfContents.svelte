@@ -35,12 +35,17 @@
       >
         On this page
       </div>
-      <ul class="space-y-1">
+      <ul class="space-y-0.5 border-l border-gray-100">
         {#each headings as heading (heading.id)}
-          <li style="padding-left: {(heading.depth - 2) * 0.75}rem">
+          <li
+            style="padding-left: {(heading.depth - 2) * 0.75 + 0.75}rem"
+            class="-ml-px border-l-2 transition-colors {activeId === heading.id
+              ? 'border-indigo-500'
+              : 'border-transparent'}"
+          >
             <a
               href={`#${heading.id}`}
-              class="block text-[0.75rem] py-0.5 transition-colors {activeId ===
+              class="block text-[0.75rem] py-1 transition-colors {activeId ===
               heading.id
                 ? 'text-indigo-600 font-medium'
                 : 'text-gray-400 hover:text-gray-600'}"

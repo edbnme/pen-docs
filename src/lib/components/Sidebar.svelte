@@ -2,7 +2,8 @@
   import { resolveRoute } from "$app/paths";
   import { page } from "$app/state";
   import { getDocSections } from "$lib/docs";
-  import GithubIcon from "./GithubIcon.svelte";
+  import GithubIcon from "./icons/GithubIcon.svelte";
+  import StarIcon from "./icons/StarIcon.svelte";
   import { onMount } from "svelte";
 
   let { onNavigate }: { onNavigate?: () => void } = $props();
@@ -21,12 +22,20 @@
     function onKeydown(e: KeyboardEvent) {
       if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey) {
         const active = document.activeElement;
-        if (active?.tagName === "INPUT" || active?.tagName === "TEXTAREA") return;
+        if (active?.tagName === "INPUT" || active?.tagName === "TEXTAREA")
+          return;
         e.preventDefault();
         filterInput?.focus();
       }
     }
     document.addEventListener("keydown", onKeydown);
+
+    // Scroll active nav item into view
+    requestAnimationFrame(() => {
+      const activeEl = document.querySelector("[data-active-nav]");
+      activeEl?.scrollIntoView({ block: "center", behavior: "instant" });
+    });
+
     return () => document.removeEventListener("keydown", onKeydown);
   });
 </script>
@@ -45,7 +54,39 @@
     </a>
   </div>
 
-  <div class="px-3 pb-2">
+  <div class="px-3 pb-2 space-y-2">
+    <button
+      onclick={() => {
+        const e = new KeyboardEvent("keydown", {
+          key: "k",
+          ctrlKey: true,
+          bubbles: true,
+        });
+        document.dispatchEvent(e);
+      }}
+      class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs text-gray-400 bg-gray-50 border border-gray-200 rounded-md hover:border-gray-300 hover:text-gray-500 transition cursor-pointer"
+    >
+      <svg
+        class="w-3.5 h-3.5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
+      </svg>
+      <span class="flex-1 text-left">Search…</span>
+      <kbd
+        class="hidden sm:inline-flex text-[0.6rem] font-mono px-1 py-0.5 bg-white border border-gray-200 rounded text-gray-400"
+      >
+        Ctrl K
+      </kbd>
+    </button>
+
     <input
       type="text"
       placeholder="Filter pages… (press /)"
@@ -76,6 +117,7 @@
             <a
               href={resolveRoute("/docs/[slug]", { slug: doc.slug })}
               onclick={onNavigate}
+              data-active-nav={isActive ? "" : undefined}
               class="block py-2 px-3 rounded-md text-[0.8125rem] transition-all border-l-2 min-h-[2.25rem] {isActive
                 ? 'text-indigo-600 bg-indigo-50 border-indigo-500 font-medium'
                 : 'text-gray-500 border-transparent hover:text-gray-900 hover:bg-gray-50'}"
@@ -97,15 +139,7 @@
     >
       <GithubIcon />
       <span>Star on GitHub</span>
-      <svg
-        class="w-3.5 h-3.5 ml-auto opacity-40"
-        viewBox="0 0 16 16"
-        fill="currentColor"
-      >
-        <path
-          d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z"
-        />
-      </svg>
+      <StarIcon class="w-3.5 h-3.5 ml-auto opacity-40" />
     </a>
   </div>
 </div>

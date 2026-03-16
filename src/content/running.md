@@ -8,7 +8,7 @@ pen --cdp-url http://localhost:9222 --log-level debug
 pen --allow-eval --project-root /my/project
 ```
 
-PEN prints `PEN ready` to stderr and waits for an MCP client on stdin/stdout. In normal use your IDE launches it automatically — you don't run it by hand.
+PEN prints `PEN ready` to stderr and waits for MCP messages on stdin/stdout. Normally your IDE handles this — you don’t run PEN by hand.
 
 ## Flags
 
@@ -32,11 +32,11 @@ For network-accessible use instead of stdio:
 pen --transport http --addr localhost:6100
 ```
 
-Serves MCP at `http://localhost:6100/mcp`. The `sse` transport works the same way — both use `mcp.NewStreamableHTTPHandler` internally.
+Serves MCP at `http://localhost:6100/mcp`. The `sse` transport works identically — both use `mcp.NewStreamableHTTPHandler` under the hood.
 
 ## Browser Setup
 
-Quit the browser **completely** first — close all windows and background processes. The debug port only works if Chrome starts fresh with the flag.
+Close the browser **all the way** first — every window, every background process. The debug port only works when Chrome launches fresh with the flag.
 
 **macOS:**
 
@@ -61,7 +61,7 @@ Verify: `http://localhost:9222/json` should return a JSON array of open tabs.
 
 ## IDE Config
 
-Your editor spawns PEN as a child process. Configure once, then forget about it.
+Your editor spawns PEN as a child process. Set it up once, then forget it.
 
 **VS Code** — `.vscode/mcp.json`:
 
@@ -135,11 +135,11 @@ COPY --from=builder /app/pen /usr/local/bin/pen
 CMD ["sh", "-c", "google-chrome --headless --no-sandbox --disable-gpu --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 & sleep 2 && exec pen --cdp-url http://127.0.0.1:9222"]
 ```
 
-Use a real process manager (supervisord, etc.) in production instead of backgrounding Chrome with `&`.
+For real deployments, use a process manager (supervisord, etc.) instead of backgrounding Chrome with `&`.
 
 ## Server / CI
 
-PEN connects to a local browser via CDP. CDP is locked to localhost — that's a security choice, not a bug.
+CDP is locked to localhost on purpose. That’s a security choice, not a limitation.
 
 ### Headless Chrome
 
@@ -167,10 +167,10 @@ pen --cdp-url http://localhost:9222
 
 ## Optional: Lighthouse CLI
 
-The `pen_lighthouse` tool runs full Lighthouse audits. It requires the Lighthouse CLI installed separately:
+The `pen_lighthouse` tool shells out to the Lighthouse CLI for full audits. Install it separately:
 
 ```bash
 npm install -g lighthouse
 ```
 
-If Lighthouse isn't installed, all other PEN tools work normally — `pen_lighthouse` returns a helpful error explaining how to install it.
+If Lighthouse isn’t installed, every other PEN tool still works fine. Only `pen_lighthouse` needs it.

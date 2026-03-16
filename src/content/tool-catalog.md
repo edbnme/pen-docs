@@ -1,12 +1,12 @@
 # Tool Reference
 
-PEN exposes 30 tools across 9 categories. Each tool follows MCP conventions: structured `inputSchema` auto-generated from Go structs, text-based output, and `isError: true` for failures.
+PEN ships with 30 tools in 9 categories. Every tool follows MCP conventions: auto-generated `inputSchema` from Go structs, text output, and `isError: true` on failure.
 
 ## Memory (4 tools)
 
 ### `pen_heap_snapshot`
 
-Take a V8 heap snapshot and analyze memory usage. Streamed to disk — safe on large heaps.
+Take a V8 heap snapshot. Streamed to disk, so even massive heaps won’t blow up memory.
 
 | Param        | Type | Default | Description                         |
 | ------------ | ---- | ------- | ----------------------------------- |
@@ -18,7 +18,7 @@ CDP: `HeapProfiler.takeHeapSnapshot`, `addHeapSnapshotChunk` events. Exclusive l
 
 ### `pen_heap_diff`
 
-Compare two heap snapshots to identify memory growth. Returns new objects, grown objects, and total delta.
+Compare two snapshots to spot memory growth. Shows new objects, grown objects, and total delta.
 
 | Param       | Type   | Required | Description           |
 | ----------- | ------ | -------- | --------------------- |
@@ -27,7 +27,7 @@ Compare two heap snapshots to identify memory growth. Returns new objects, grown
 
 ### `pen_heap_track`
 
-Start/stop heap object allocation tracking for leak detection over time.
+Toggle heap allocation tracking for leak detection over time.
 
 | Param              | Type   | Default | Description             |
 | ------------------ | ------ | ------- | ----------------------- |
@@ -38,7 +38,7 @@ CDP: `HeapProfiler.startTrackingHeapObjects` / `stopTrackingHeapObjects`.
 
 ### `pen_heap_sampling`
 
-Start/stop sampling-based heap profiling (lower overhead than full snapshots).
+Toggle sampling-based heap profiling. Lower overhead than full snapshots.
 
 | Param              | Type   | Default | Description           |
 | ------------------ | ------ | ------- | --------------------- |
@@ -53,7 +53,7 @@ CDP: `HeapProfiler.startSampling` / `stopSampling` / `getSamplingProfile`.
 
 ### `pen_cpu_profile`
 
-Record a CPU profile for a given duration and analyze hot functions.
+Record a CPU profile and surface the hottest functions.
 
 | Param        | Type | Default | Description                                |
 | ------------ | ---- | ------- | ------------------------------------------ |
@@ -65,7 +65,7 @@ CDP: `Profiler.start` / `stop`. Exclusive lock.
 
 ### `pen_capture_trace`
 
-Capture a Chrome trace (DevTools Timeline). Streamed to disk via `IO.read`.
+Grab a Chrome trace (DevTools Timeline). Streamed to disk via `IO.read`.
 
 | Param        | Type     | Default | Description             |
 | ------------ | -------- | ------- | ----------------------- |
@@ -76,7 +76,7 @@ Default categories: `devtools.timeline`, `v8.execute`, `blink.user_timing`, `loa
 
 ### `pen_trace_insights`
 
-Analyze a captured trace file offline. Extracts long tasks (>50ms), CLS, LCP, slowest resources, and frame timing.
+Crunch a previously captured trace file. Pulls out long tasks (>50ms), CLS, LCP, slowest resources, and frame timing.
 
 | Param  | Type   | Default | Description                                        |
 | ------ | ------ | ------- | -------------------------------------------------- |
@@ -159,7 +159,7 @@ CDP: `CSS.startRuleUsageTracking` / `stopRuleUsageTracking`.
 
 ### `pen_performance_metrics`
 
-Get real-time performance metrics (instant, no profiling required). No parameters.
+Grab real-time performance counters (instant, no profiling needed). No parameters.
 
 CDP: `Performance.getMetrics`. Returns JSHeapUsedSize, Nodes, LayoutCount, RecalcStyleCount, ScriptDuration, TaskDuration, etc.
 
@@ -175,7 +175,7 @@ CDP: `Runtime.evaluate` with PerformanceObserver entries.
 
 ### `pen_accessibility_check`
 
-Quick accessibility scan: missing alt text, unlabeled inputs, contrast issues, ARIA violations.
+Quick accessibility sweep: missing alt text, unlabeled inputs, contrast problems, ARIA violations.
 
 | Param      | Type   | Description                                  |
 | ---------- | ------ | -------------------------------------------- |
@@ -189,7 +189,7 @@ CDP: `DOM`, `Runtime`.
 
 ### `pen_list_sources`
 
-List all parsed JavaScript sources in the page.
+List every parsed JS source in the page.
 
 | Param     | Type   | Default | Description                       |
 | --------- | ------ | ------- | --------------------------------- |
@@ -200,7 +200,7 @@ CDP: `Debugger.enable`, `scriptParsed` events. Reports source map URLs as metada
 
 ### `pen_source_content`
 
-Get the source code of a specific script.
+Fetch the source of a specific script.
 
 | Param        | Type   | Default | Description                       |
 | ------------ | ------ | ------- | --------------------------------- |
@@ -208,7 +208,7 @@ Get the source code of a specific script.
 | `urlPattern` | string | —       | URL substring (first match)       |
 | `maxLines`   | int    | 200     | Truncate after N lines            |
 
-CDP: `Debugger.getScriptSource`. Returns the script as V8 sees it — bundled/minified if that's what's loaded.
+CDP: `Debugger.getScriptSource`. You get the code as V8 sees it — bundled or minified if that’s what’s loaded.
 
 ### `pen_search_source`
 
@@ -229,7 +229,7 @@ CDP: `Debugger.searchInContent`.
 
 ### `pen_console_enable`
 
-Start capturing console messages and exceptions from the page. Must be called before `pen_console_messages`.
+Start capturing console output and exceptions. Call this before `pen_console_messages`.
 
 | Param        | Type | Default | Description                             |
 | ------------ | ---- | ------- | --------------------------------------- |
@@ -255,14 +255,14 @@ Buffers up to **1,000 messages**. When full, the oldest 100 entries are evicted.
 
 ### `pen_lighthouse`
 
-Run a full Lighthouse audit against the current or specified URL. Requires the Lighthouse CLI (`npm install -g lighthouse`).
+Run a full Lighthouse audit. Needs the Lighthouse CLI (`npm install -g lighthouse`).
 
 | Param        | Type     | Default                                                  | Description         |
 | ------------ | -------- | -------------------------------------------------------- | ------------------- |
 | `categories` | []string | `["performance","accessibility","best-practices","seo"]` | Categories to audit |
 | `url`        | string   | current page                                             | URL to audit        |
 
-Allowed categories: `performance`, `accessibility`, `best-practices`, `seo`, `pwa`. Lighthouse connects to Chrome via the same CDP port PEN uses — no new browser is launched. Uses an exclusive lock.
+Allowed categories: `performance`, `accessibility`, `best-practices`, `seo`, `pwa`. Lighthouse connects to Chrome through the same CDP port PEN uses — no extra browser.
 
 ---
 
@@ -270,15 +270,15 @@ Allowed categories: `performance`, `accessibility`, `best-practices`, `seo`, `pw
 
 ### `pen_status`
 
-Show PEN server status. No parameters. Returns CDP connection state, version, active target, configured features.
+Show PEN server status. No parameters. Returns connection state, version, active target, and config.
 
 ### `pen_list_pages`
 
-List all browser tabs/pages with URLs, titles, and target IDs. No parameters.
+List all open browser tabs with URLs, titles, and target IDs. No parameters.
 
 ### `pen_select_page`
 
-Switch PEN's target to a different browser tab.
+Point PEN at a different tab.
 
 | Param        | Type   | Description                     |
 | ------------ | ------ | ------------------------------- |
@@ -287,7 +287,7 @@ Switch PEN's target to a different browser tab.
 
 ### `pen_navigate`
 
-Navigate the current page: go to a URL, go back, go forward, or reload.
+Navigate the current page: go to a URL, back, forward, or reload.
 
 | Param    | Type   | Default | Description                                       |
 | -------- | ------ | ------- | ------------------------------------------------- |
@@ -295,7 +295,7 @@ Navigate the current page: go to a URL, go back, go forward, or reload.
 | `url`    | string | —       | URL (required when action is `goto`)              |
 | `wait`   | int    | 2       | Seconds to wait after navigation (0–30)           |
 
-URL validation blocks dangerous schemes (`javascript:`, `data:`, `file:`, `chrome:`, `about:`, `ftp:`, `ws:`, `wss:`, `blob:`, `vbscript:`). Only `http:` and `https:` are allowed. Forward navigation uses `Page.getNavigationHistory` + `Page.navigateToHistoryEntry`.
+URL validation blocks dangerous schemes (`javascript:`, `data:`, `file:`, `chrome:`, `about:`, `ftp:`, `ws:`, `wss:`, `blob:`, `vbscript:`). Only HTTP and HTTPS get through. Forward navigation uses `Page.getNavigationHistory` + `Page.navigateToHistoryEntry`.
 
 ### `pen_collect_garbage`
 
@@ -303,7 +303,7 @@ Force V8 garbage collection. No parameters. Rate limit: **5s cooldown**.
 
 ### `pen_screenshot`
 
-Capture a screenshot of the current page or a specific element.
+Snap a screenshot of the current page or a specific element.
 
 | Param      | Type   | Default | Description                      |
 | ---------- | ------ | ------- | -------------------------------- |
@@ -328,7 +328,7 @@ Network presets: 3G (563ms latency, 188KB/s), 4G (170ms, 500KB/s), WiFi (2ms, 3.
 
 ### `pen_evaluate`
 
-Evaluate a JavaScript expression in the page context. **Only available with `--allow-eval` flag.**
+Run JavaScript in the page context. **Requires the `--allow-eval` flag.**
 
 | Param           | Type   | Default | Description              |
 | --------------- | ------ | ------- | ------------------------ |
@@ -362,4 +362,4 @@ Tools produce IDs consumed by downstream tools:
 | `pen_capture_trace`     | `pen_trace_insights`                      | Trace File Path |
 | `pen_console_enable`    | `pen_console_messages`                    | — (implicit)    |
 
-IDs remain valid until PEN restarts or the underlying resource is destroyed (tab closed, page navigated, etc.).
+IDs stay valid until PEN restarts or the underlying thing goes away (tab closed, page navigated, etc.).

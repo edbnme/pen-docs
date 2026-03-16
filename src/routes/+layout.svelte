@@ -1,11 +1,25 @@
 <script lang="ts">
   import "../app.css";
   import "highlight.js/styles/github.css";
+  import { onNavigate } from "$app/navigation";
   import Sidebar from "$lib/components/Sidebar.svelte";
   import MobileHeader from "$lib/components/MobileHeader.svelte";
   import BackToTop from "$lib/components/BackToTop.svelte";
+  import CommandPalette from "$lib/components/CommandPalette.svelte";
+  import ReadingProgress from "$lib/components/ReadingProgress.svelte";
 
   let { children } = $props();
+
+  onNavigate((navigation) => {
+    // Use View Transitions API if available
+    if (!document.startViewTransition) return;
+    return new Promise((resolve) => {
+      document.startViewTransition(async () => {
+        resolve();
+        await navigation.complete;
+      });
+    });
+  });
 </script>
 
 <svelte:head>
@@ -22,7 +36,9 @@
 </svelte:head>
 
 <div class="min-h-screen bg-white">
+  <ReadingProgress />
   <MobileHeader />
+  <CommandPalette />
 
   <div class="flex">
     <!-- Desktop sidebar -->

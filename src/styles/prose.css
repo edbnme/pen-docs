@@ -1,0 +1,75 @@
+/* Prose typography — all styles use Tailwind @apply */
+
+.prose h1 {
+  @apply text-2xl font-bold mt-0 mb-4 text-gray-900 dark:text-gray-100;
+}
+.prose h2 {
+  @apply text-xl font-semibold mt-8 mb-3 text-gray-800 dark:text-gray-200 pb-2 border-b border-gray-200 dark:border-gray-800 scroll-mt-20;
+}
+.prose h3 {
+  @apply text-base font-semibold mt-6 mb-2 text-gray-700 dark:text-gray-300 scroll-mt-20;
+}
+.prose h4 {
+  @apply text-sm font-semibold mt-5 mb-2 text-gray-600 dark:text-gray-400 scroll-mt-20;
+}
+.prose p {
+  @apply my-3 text-gray-700 dark:text-gray-300 leading-relaxed;
+}
+.prose a {
+  @apply text-indigo-600 dark:text-indigo-400 no-underline hover:underline;
+}
+.prose strong {
+  @apply font-semibold text-gray-900 dark:text-gray-100;
+}
+
+/* Lists */
+.prose ul {
+  @apply my-2 pl-6 list-disc;
+}
+.prose ol {
+  @apply my-2 pl-6 list-decimal;
+}
+.prose li {
+  @apply my-1 text-gray-700 dark:text-gray-300 leading-relaxed;
+}
+.prose li > ul,
+.prose li > ol {
+  @apply mt-1;
+}
+
+/* Blockquotes */
+.prose blockquote {
+  @apply my-4 py-3 px-4 border-l-[3px] border-indigo-500 dark:border-indigo-400 bg-slate-50 dark:bg-gray-900 rounded-r-md text-gray-600 dark:text-gray-300;
+}
+.prose blockquote p {
+  @apply m-0;
+}
+
+/* Horizontal rules */
+.prose hr {
+  @apply my-8 border-gray-200 dark:border-gray-800;
+}
+
+/* Images */
+.prose img {
+  @apply max-w-full rounded-lg my-4;
+}
+
+/* Tables */
+.prose table {
+  @apply w-full my-4 border-collapse text-[0.8125rem];
+}
+.prose thead th {
+  @apply text-left font-semibold text-gray-700 dark:text-gray-300 py-2 px-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900;
+}
+.prose tbody td {
+  @apply py-2 px-3 border-b border-gray-100 dark:border-gray-800 text-gray-600 dark:text-gray-400;
+}
+.prose tbody tr:hover {
+  @apply bg-gray-50 dark:bg-gray-900/50;
+}
+
+.table-wrapper {
+  @apply overflow-x-auto;
+  -webkit-overflow-scrolling: touch;
+}

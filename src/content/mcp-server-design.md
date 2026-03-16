@@ -1,10 +1,10 @@
 # MCP Server Design
 
-PEN implements the [Model Context Protocol](https://spec.modelcontextprotocol.io/2025-03-26/) using the [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) v1.3.1.
+PEN implements the [Model Context Protocol](https://spec.modelcontextprotocol.io/2025-03-26/) with the [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) v1.3.1.
 
 ## Server Initialization
 
-PEN creates the MCP server with an implementation header and server options:
+PEN creates the MCP server with an identity header and a few key options:
 
 ```go
 srv := mcp.NewServer(
@@ -20,11 +20,11 @@ srv := mcp.NewServer(
 )
 ```
 
-**Key options:**
+**What matters here:**
 
-- `Instructions` tells the LLM what PEN does and how to use it. Sent during the MCP `initialize` handshake.
-- `KeepAlive` sends periodic pings over the transport to detect stale sessions.
-- `InitializedHandler` fires when the client completes the MCP handshake.
+- `Instructions` tells the LLM what PEN is and how to use it. Sent during the `initialize` handshake.
+- `KeepAlive` pings the transport periodically to catch dead sessions.
+- `InitializedHandler` fires once the client finishes the handshake.
 
 ## Tool Registration
 
@@ -43,7 +43,7 @@ tools.RegisterAll(pen.Server(), &tools.Deps{
 })
 ```
 
-The `Deps` struct bundles everything tool handlers need — no global state. Each category registers its tools in a separate function (`registerMemoryTools`, `registerCPUTools`, `registerNetworkTools`, etc.).
+The `Deps` struct bundles everything handlers need — no globals anywhere. Tools are grouped by category (`registerMemoryTools`, `registerCPUTools`, etc.).
 
 ### Typed Generic Handlers
 
@@ -53,17 +53,7 @@ The MCP Go SDK uses Go generics for type-safe tool handlers:
 mcp.AddTool[InputType, any](server, toolDefinition, handlerFunc)
 ```
 
-Where `InputType` is a Go struct with `jsonschema` tags:
-
-```go
-type heapSnapshotInput struct {
-    ForceGC    bool `json:"forceGC"    jsonschema:"description=Force GC before snapshot"`
-    IncludeDOM bool `json:"includeDOM" jsonschema:"description=Include detached DOM analysis"`
-    MaxDepth   int  `json:"maxDepth"   jsonschema:"description=Retained size analysis depth (1-10)"`
-}
-```
-
-The SDK auto-generates `inputSchema` from these struct tags. Handler functions receive the unmarshaled input directly — no manual JSON parsing.
+Where `InputType` is a Go struct with `jsonschema` tags. The SDK builds the `inputSchema` from these tags automatically. Handlers get the unmarshaled input directly — no manual JSON parsing.
 
 ### Handler Signature
 
@@ -125,7 +115,7 @@ func toolError(msg string) (*mcp.CallToolResult, any, error) {
 }
 ```
 
-The SDK sets `isError: true` on the response automatically. Error messages are written for LLM consumption — they explain what went wrong and suggest next steps.
+The SDK sets `isError: true` on the response automatically. Errors are written for LLM consumption — they explain what went wrong and what to try next.
 
 Example: _"HeapProfiler is already in use by another operation. Wait for the current heap snapshot to finish, or call another tool in the meantime."_
 
@@ -143,7 +133,7 @@ if err != nil {
 defer release()
 ```
 
-The lock is never held across `await` boundaries — `defer release()` ensures cleanup even on panics.
+The lock never spans async boundaries — `defer release()` guarantees cleanup even on panics.
 
 ### Rate Limiting
 
@@ -159,22 +149,22 @@ The limiter tracks the last execution time per tool. `Record` is called after su
 
 ### Context Cancellation
 
-Every handler respects `ctx.Done()`. If the MCP client disconnects mid-operation, CDP calls are cancelled, temp files are cleaned via `defer`, and domain locks are released.
+Every handler respects `ctx.Done()`. If the client bails mid-operation, CDP calls cancel, temp files clean up via `defer`, and domain locks release.
 
 ## Capabilities
 
 PEN declares standard MCP server capabilities during the `initialize` handshake:
 
 - **Tools**: Full `tools/list` and `tools/call` support
-- **Progress**: Sends `notifications/progress` for long-running operations (heap snapshots, traces)
+- **Progress**: Sends `notifications/progress` for slow operations (heap snapshots, traces)
 - **No resources or prompts**: PEN is tools-only — no MCP resources or prompt templates
 
 ## `pen init` — Interactive Setup
 
-PEN includes an interactive setup wizard accessed via `pen init`. This is built with:
+PEN ships with an interactive setup wizard via `pen init`, built with:
 
 - **[charmbracelet/huh](https://github.com/charmbracelet/huh) v1.0.0** — terminal form framework for the multi-step wizard
 - **[charmbracelet/lipgloss](https://github.com/charmbracelet/lipgloss) v1.1.0** — terminal styling for formatted output
 - **charmbracelet/huh/spinner** — loading animations during connection verification
 
-The wizard auto-detects the environment (installed browsers, IDE configurations) and generates the correct MCP config file. It's the recommended first-run experience.
+The wizard sniffs out installed browsers and IDE configs, then writes the right MCP config file. It’s the best way to get started.

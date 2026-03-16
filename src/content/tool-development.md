@@ -1,6 +1,6 @@
 # Adding Tools
 
-Guide for adding new tools to PEN. Every tool follows the same pattern — this guide walks through it with a real example.
+How to add a new tool to PEN. Every tool follows the same shape — this guide walks through it end-to-end.
 
 ```mermaid
 flowchart LR
@@ -31,7 +31,7 @@ Tools live in `internal/tools/`. Each file covers one category:
 
 ## Step 1: Define the Input Struct
 
-Create a Go struct with `json` and `jsonschema` tags. The MCP SDK auto-generates `inputSchema` from these.
+Create a Go struct with `json` and `jsonschema` tags. The SDK turns these into `inputSchema` automatically.
 
 ```go
 type myToolInput struct {
@@ -61,7 +61,7 @@ var myTool = mcp.Tool{
 }
 ```
 
-All PEN tools are prefixed with `pen_`. The description is shown to the LLM in `tools/list` — make it clear and actionable.
+All PEN tools start with `pen_`. Write the description for LLMs — it shows up in `tools/list` and that’s how the model decides whether to call it.
 
 ## Step 3: Write the Handler
 
@@ -121,7 +121,7 @@ func toolError(msg string) (*mcp.CallToolResult, any, error) {
 }
 ```
 
-The SDK sets `isError: true` automatically. Write error messages for LLM consumption — explain what happened, why, and what to do next.
+The SDK flips `isError: true` automatically. Write errors for the LLM — say what happened, why, and what to try next.
 
 ### Progress Notifications
 
@@ -131,7 +131,7 @@ For long-running operations, send progress:
 server.NotifyProgress(ctx, req, bytesWritten, totalBytes, "processing...")
 ```
 
-Safe to call unconditionally — no-ops if no progress token.
+Safe to call every time — it’s a no-op if there’s no progress token.
 
 ## Step 4: Register the Tool
 
@@ -156,7 +156,7 @@ func RegisterAll(s *mcp.Server, deps *Deps) {
 
 ## Step 5: Add Rate Limiting (Optional)
 
-If the tool is expensive, add a cooldown in `security/ratelimit.go`:
+If the tool is expensive, give it a cooldown in `security/ratelimit.go`:
 
 ```go
 var DefaultCooldowns = map[string]time.Duration{
@@ -167,11 +167,11 @@ var DefaultCooldowns = map[string]time.Duration{
 }
 ```
 
-## Step 6: Write Tests
+## Step 6: Test It
 
-Add tests in `tools/tools_test.go` or create a new test file. Tests use the MCP SDK's test helpers to exercise tools without a real browser.
+Add tests in `tools/tools_test.go` or a new file. The MCP SDK has test helpers for exercising tools without a real browser.
 
-## Patterns to Follow
+## Patterns Worth Following
 
 ### Output Formatting
 
@@ -196,7 +196,7 @@ out := format.ToolResult("Tool Name",
 
 ### Temp Files
 
-For operations that produce large output:
+For tools that produce big output:
 
 ```go
 f, err := security.CreateSecureTempFile("mytool-")

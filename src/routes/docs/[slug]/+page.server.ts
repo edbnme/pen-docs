@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import { docOrder, getDocBySlug } from "$lib/docs";
-import { renderMarkdown, extractHeadings } from "$lib/markdown";
+import { renderMarkdown, extractHeadings } from "$lib/markdown/index";
 import type { PageServerLoad, EntryGenerator } from "./$types";
 import { error } from "@sveltejs/kit";
 
