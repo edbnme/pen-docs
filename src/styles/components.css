@@ -1,10 +1,17 @@
 /* Mermaid diagrams */
-.prose .mermaid {
-  @apply my-6 p-6 border border-indigo-100 rounded-xl overflow-x-auto flex justify-center;
+.prose .mermaid-container {
+  @apply my-6 p-6 border border-indigo-100 dark:border-indigo-900 rounded-xl overflow-x-auto flex justify-center;
   background: linear-gradient(135deg, #fafbff 0%, #f0f4ff 100%);
+  -webkit-overflow-scrolling: touch;
 }
-.prose .mermaid svg {
+@media (prefers-color-scheme: dark) {
+  .prose .mermaid-container {
+    background: linear-gradient(135deg, #0f1118 0%, #111827 100%);
+  }
+}
+.prose .mermaid-container svg {
   @apply max-w-full h-auto;
+  min-width: 280px;
 }
 
 /* Fade-in animation */

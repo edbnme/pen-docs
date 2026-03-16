@@ -12,21 +12,22 @@
 </script>
 
 <div
-  class="mobile-header lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200"
+  class="mobile-header lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur border-b border-gray-200 dark:border-gray-800"
 >
   <div class="flex items-center justify-between px-4 h-12">
     <button
       onclick={() => (open = !open)}
-      class="p-1.5 -ml-1.5 rounded-md hover:bg-gray-100 transition"
-      aria-label="Toggle navigation"
+      class="p-1.5 -ml-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition"
     >
       {#if open}
-        <CloseIcon class="w-5 h-5 text-gray-600" />
+        <CloseIcon class="w-5 h-5 text-gray-600 dark:text-gray-400" />
       {:else}
-        <MenuIcon class="w-5 h-5 text-gray-600" />
+        <MenuIcon class="w-5 h-5 text-gray-600 dark:text-gray-400" />
       {/if}
     </button>
-    <span class="text-sm font-semibold text-gray-900">PEN Docs</span>
+    <span class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+      >PEN Docs</span
+    >
     <div class="flex items-center gap-1">
       <button
         onclick={() => {
@@ -37,11 +38,11 @@
           });
           document.dispatchEvent(e);
         }}
-        class="p-1.5 rounded-md hover:bg-gray-100 transition"
+        class="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition"
         aria-label="Search documentation"
       >
         <svg
-          class="w-5 h-5 text-gray-500"
+          class="w-5 h-5 text-gray-500 dark:text-gray-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -58,10 +59,10 @@
         href="https://github.com/edbnme/pen"
         target="_blank"
         rel="noopener noreferrer"
-        class="p-1.5 -mr-1.5 rounded-md hover:bg-gray-100 transition"
+        class="p-1.5 -mr-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition"
         aria-label="GitHub repository"
       >
-        <GithubIcon class="w-5 h-5 text-gray-500" />
+        <GithubIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
       </a>
     </div>
   </div>
@@ -79,7 +80,7 @@
       aria-label="Close navigation"
     ></button>
     <div
-      class="absolute left-0 top-0 bottom-0 w-72 bg-white shadow-2xl overflow-y-auto animate-slide-in-left"
+      class="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-gray-950 shadow-2xl overflow-y-auto animate-slide-in-left"
     >
       <Sidebar onNavigate={close} />
     </div>

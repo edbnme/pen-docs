@@ -1,6 +1,6 @@
 <script lang="ts">
   import "../app.css";
-  import "highlight.js/styles/github.css";
+  // highlight.js themes are imported via app.css with media queries
   import { onNavigate } from "$app/navigation";
   import Sidebar from "$lib/components/Sidebar.svelte";
   import MobileHeader from "$lib/components/MobileHeader.svelte";
@@ -35,7 +35,7 @@
   />
 </svelte:head>
 
-<div class="min-h-screen bg-white">
+<div class="min-h-screen bg-white dark:bg-gray-950">
   <ReadingProgress />
   <MobileHeader />
   <CommandPalette />
@@ -43,7 +43,7 @@
   <div class="flex">
     <!-- Desktop sidebar -->
     <aside
-      class="sidebar hidden lg:block w-60 shrink-0 border-r border-gray-200 fixed top-0 left-0 h-screen overflow-y-auto bg-white/80 backdrop-blur z-30"
+      class="sidebar hidden lg:block w-60 shrink-0 border-r border-gray-200 dark:border-gray-800 fixed top-0 left-0 h-screen overflow-y-auto bg-white/80 dark:bg-gray-950/80 backdrop-blur z-30"
     >
       <Sidebar />
     </aside>

@@ -31,11 +31,11 @@
   <nav class="toc hidden xl:block w-56 shrink-0">
     <div class="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
       <div
-        class="text-[0.65rem] font-semibold text-gray-400 uppercase tracking-widest mb-2"
+        class="text-[0.65rem] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2"
       >
         On this page
       </div>
-      <ul class="space-y-0.5 border-l border-gray-100">
+      <ul class="space-y-0.5 border-l border-gray-100 dark:border-gray-800">
         {#each headings as heading (heading.id)}
           <li
             style="padding-left: {(heading.depth - 2) * 0.75 + 0.75}rem"
@@ -47,8 +47,8 @@
               href={`#${heading.id}`}
               class="block text-[0.75rem] py-1 transition-colors {activeId ===
               heading.id
-                ? 'text-indigo-600 font-medium'
-                : 'text-gray-400 hover:text-gray-600'}"
+                ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}"
             >
               {heading.text}
             </a>

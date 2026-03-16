@@ -85,12 +85,14 @@
     ></button>
 
     <div
-      class="relative w-full max-w-lg mx-4 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
+      class="relative w-full max-w-lg mx-4 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Search documentation"
     >
-      <div class="flex items-center gap-3 px-4 border-b border-gray-100">
+      <div
+        class="flex items-center gap-3 px-4 border-b border-gray-100 dark:border-gray-800"
+      >
         <svg
           class="w-4 h-4 text-gray-400 shrink-0"
           fill="none"
@@ -109,12 +111,12 @@
           bind:value={query}
           type="text"
           placeholder="Search documentation..."
-          class="flex-1 py-3 text-sm bg-transparent outline-none placeholder-gray-400"
+          class="flex-1 py-3 text-sm bg-transparent outline-none placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100"
           autocomplete="off"
           spellcheck="false"
         />
         <kbd
-          class="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[0.65rem] font-mono text-gray-400 bg-gray-50 border border-gray-200 rounded"
+          class="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[0.65rem] font-mono text-gray-400 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded"
         >
           ESC
         </kbd>
@@ -130,23 +132,23 @@
             <button
               class="w-full text-left px-4 py-2.5 flex items-center gap-3 transition-colors {i ===
               selectedIndex
-                ? 'bg-indigo-50 text-indigo-700'
-                : 'text-gray-600 hover:bg-gray-50'}"
+                ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}"
               onclick={() => navigate(doc)}
               onmouseenter={() => (selectedIndex = i)}
             >
               <div class="min-w-0 flex-1">
                 <div
                   class="text-sm font-medium {i === selectedIndex
-                    ? 'text-indigo-700'
-                    : 'text-gray-900'}"
+                    ? 'text-indigo-700 dark:text-indigo-300'
+                    : 'text-gray-900 dark:text-gray-100'}"
                 >
                   {doc.title}
                 </div>
                 <div
                   class="text-xs mt-0.5 truncate {i === selectedIndex
-                    ? 'text-indigo-500'
-                    : 'text-gray-400'}"
+                    ? 'text-indigo-500 dark:text-indigo-400'
+                    : 'text-gray-400 dark:text-gray-500'}"
                 >
                   {doc.description}
                 </div>
@@ -154,8 +156,8 @@
               <span
                 class="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded {i ===
                 selectedIndex
-                  ? 'text-indigo-400 bg-indigo-100'
-                  : 'text-gray-300 bg-gray-100'}"
+                  ? 'text-indigo-400 bg-indigo-100 dark:bg-indigo-900'
+                  : 'text-gray-300 dark:text-gray-500 bg-gray-100 dark:bg-gray-800'}"
               >
                 {doc.section}
               </span>
@@ -165,22 +167,25 @@
       </div>
 
       <div
-        class="flex items-center gap-4 px-4 py-2 border-t border-gray-100 text-[0.65rem] text-gray-400"
+        class="flex items-center gap-4 px-4 py-2 border-t border-gray-100 dark:border-gray-800 text-[0.65rem] text-gray-400"
       >
         <span class="flex items-center gap-1">
-          <kbd class="px-1 py-0.5 bg-gray-50 border border-gray-200 rounded"
+          <kbd
+            class="px-1 py-0.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded"
             >↑↓</kbd
           >
           navigate
         </span>
         <span class="flex items-center gap-1">
-          <kbd class="px-1 py-0.5 bg-gray-50 border border-gray-200 rounded"
+          <kbd
+            class="px-1 py-0.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded"
             >↵</kbd
           >
           open
         </span>
         <span class="flex items-center gap-1">
-          <kbd class="px-1 py-0.5 bg-gray-50 border border-gray-200 rounded"
+          <kbd
+            class="px-1 py-0.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded"
             >esc</kbd
           >
           close
