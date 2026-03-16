@@ -5,36 +5,32 @@ export interface DocEntry {
 }
 
 export const docs: DocEntry[] = [
-  { slug: "readme", title: "README", section: "Getting Started" },
-  { slug: "install", title: "Getting Started", section: "Getting Started" },
-  { slug: "running", title: "Running PEN", section: "Getting Started" },
+  // Users
+  { slug: "readme", title: "Introduction", section: "Users" },
+  { slug: "install", title: "Installation", section: "Users" },
+  { slug: "running", title: "Running PEN", section: "Users" },
+  { slug: "tool-catalog", title: "Tool Reference", section: "Users" },
+  { slug: "workflows", title: "Workflows", section: "Users" },
+  { slug: "troubleshooting", title: "Troubleshooting", section: "Users" },
+  { slug: "security", title: "Security", section: "Users" },
+
+  // Contributors
+  { slug: "architecture", title: "Architecture", section: "Contributors" },
   {
-    slug: "executive-summary",
-    title: "Executive Summary",
-    section: "Guide",
+    slug: "cdp-integration",
+    title: "CDP Integration",
+    section: "Contributors",
   },
-  { slug: "tool-catalog", title: "Tool Catalog", section: "Guide" },
-  { slug: "edge-cases", title: "Edge Cases", section: "Guide" },
-  { slug: "security-model", title: "Security Model", section: "Guide" },
-  {
-    slug: "system-architecture",
-    title: "System Architecture",
-    section: "Architecture",
-  },
-  { slug: "cdp-integration", title: "CDP Integration", section: "Architecture" },
-  { slug: "data-streaming", title: "Data Streaming", section: "Architecture" },
+  { slug: "data-streaming", title: "Data Streaming", section: "Contributors" },
   {
     slug: "mcp-server-design",
     title: "MCP Server Design",
-    section: "Architecture",
+    section: "Contributors",
   },
-  { slug: "source-tools", title: "Source Tools", section: "Architecture" },
-  {
-    slug: "ide-llm-integration",
-    title: "IDE & LLM Integration",
-    section: "Architecture",
-  },
-  { slug: "sources", title: "Sources", section: "Reference" },
+  { slug: "tool-development", title: "Adding Tools", section: "Contributors" },
+  { slug: "output-design", title: "Output Design", section: "Contributors" },
+  { slug: "error-handling", title: "Error Handling", section: "Contributors" },
+  { slug: "references", title: "References", section: "Contributors" },
 ];
 
 export const docOrder = docs.map((d) => d.slug);

@@ -4,200 +4,96 @@ MCP server that connects AI assistants to Chrome DevTools. Ask your AI to profil
 
 Single Go binary. No Node.js. No browser launch. Attach to your dev browser and go.
 
-## Install
+## How It Works
 
-**Quick install (recommended):**
-
-```bash
-# macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/edbnme/pen/main/install.sh | sh
-
-# Windows (PowerShell)
-irm https://raw.githubusercontent.com/edbnme/pen/main/install.ps1 | iex
+```
+AI Assistant ◄── MCP (stdio / HTTP) ──► PEN (Go) ── CDP (WebSocket) ──► Chrome
 ```
 
-Then run the interactive setup wizard:
+Your IDE (VS Code, Cursor, Claude Desktop) spawns PEN as a child process. When an LLM calls a tool like `pen_heap_snapshot`, PEN translates it to Chrome DevTools Protocol commands, streams results to disk, and returns structured analysis the LLM can interpret.
 
-```bash
-pen init
-```
+## What You Can Do
 
-**Package managers:**
+| Category       | What it does                                                               | Tools   |
+| -------------- | -------------------------------------------------------------------------- | ------- |
+| **Memory**     | Heap snapshots, diff two snapshots for leak detection, allocation tracking | 4 tools |
+| **CPU**        | CPU profiling, Chrome traces, offline trace analysis                       | 3 tools |
+| **Network**    | Request capture, waterfall view, render-blocking detection                 | 4 tools |
+| **Coverage**   | JavaScript and CSS code coverage with unused byte analysis                 | 2 tools |
+| **Audit**      | Performance metrics, Core Web Vitals, accessibility scan                   | 3 tools |
+| **Source**     | List loaded scripts, retrieve source, search across all scripts            | 3 tools |
+| **Console**    | Real-time console message capture and filtering                            | 2 tools |
+| **Lighthouse** | Full Lighthouse audits (requires CLI)                                      | 1 tool  |
+| **Utility**    | Navigation, screenshots, eval, device emulation, tab management            | 8 tools |
 
-```bash
-# macOS / Linux
-brew install edbnme/tap/pen
-
-# Windows
-scoop bucket add pen https://github.com/edbnme/scoop-pen
-scoop install pen
-```
-
-**Other options:**
-
-```bash
-# Download binary from GitHub Releases (all platforms)
-# → https://github.com/edbnme/pen/releases/latest
-
-# Or install with Go 1.23+
-go install github.com/edbnme/pen/cmd/pen@latest
-```
-
-Verify it works:
-
-```bash
-pen --version
-```
-
-More install methods (from source, manual binary setup): [Getting Started](/docs/install)
+30 tools total. See the full [Tool Reference](/docs/tool-catalog).
 
 ## Quick Start
 
-The fastest way to get going is the interactive setup wizard:
-
 ```bash
+# Install
+curl -fsSL https://raw.githubusercontent.com/edbnme/pen/main/install.sh | sh
+
+# Interactive setup wizard
 pen init
 ```
 
-This auto-detects your environment, lets you pick your IDE and browser, generates the MCP config, and optionally launches your browser with debugging — all in one command.
+`pen init` auto-detects your environment, lets you pick your IDE and browser, generates the MCP config, and verifies the connection — all in one command.
 
-### Manual setup
-
-> **Important:** Quit the browser completely first — all windows and background processes. The debug port only works if Chrome starts fresh with the flag.
-
-**macOS:**
+Or install via package managers:
 
 ```bash
-open -a "Google Chrome" --args --remote-debugging-port=9222
+brew install edbnme/tap/pen    # macOS / Linux
+scoop bucket add pen https://github.com/edbnme/scoop-pen && scoop install pen  # Windows
 ```
 
-**Windows (PowerShell):**
+Full install guide: [Installation](/docs/install)
 
-```powershell
-& "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
-```
+## Example
 
-**Linux:**
-
-```bash
-google-chrome --remote-debugging-port=9222
-```
-
-Verify the debug port is open — visit http://localhost:9222/json in a new tab. You should see a JSON array. If it doesn't load, the browser wasn't fully closed before relaunch.
-
-### 2. Add PEN to your IDE
-
-**VS Code** — create `.vscode/mcp.json` in your project:
-
-```json
-{
-  "servers": {
-    "pen": {
-      "command": "pen",
-      "args": ["--project-root", "${workspaceFolder}"]
-    }
-  }
-}
-```
-
-**Cursor** — `.cursor/mcp.json` in your project (or `~/.cursor/mcp.json` for global):
-
-```json
-{
-  "mcpServers": {
-    "pen": {
-      "command": "pen",
-      "args": ["--project-root", "${workspaceFolder}"]
-    }
-  }
-}
-```
-
-**Claude Desktop** — [config path](/docs/install#claude-desktop):
-
-```json
-{
-  "mcpServers": {
-    "pen": {
-      "command": "pen",
-      "args": ["--project-root", "/absolute/path/to/project"]
-    }
-  }
-}
-```
-
-### 3. Use it
-
-Open a page in the debug browser, then ask your AI:
+Ask your AI assistant:
 
 > _"Check the performance metrics of this page"_
 
-PEN connects to the browser, runs the profiling, and returns structured results.
-
-## Flags
-
-| Flag             | Default                 | Purpose                                    |
-| ---------------- | ----------------------- | ------------------------------------------ |
-| `--cdp-url`      | `http://localhost:9222` | CDP endpoint                               |
-| `--transport`    | `stdio`                 | `stdio`, `http`, or `sse`                  |
-| `--addr`         | `localhost:6100`        | Bind address for HTTP/SSE                  |
-| `--allow-eval`   | `false`                 | Enable `pen_evaluate` (runs JS in browser) |
-| `--project-root` | `.`                     | Sandbox for source file paths              |
-| `--log-level`    | `info`                  | `debug` / `info` / `warn` / `error`        |
-| `--version`      | —                       | Print version and exit                     |
-
-## Tools
-
-30 tools across 9 categories:
-
-| Category        | Tools                                                                                                                                            |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Performance** | `pen_performance_metrics` · `pen_web_vitals` · `pen_accessibility_check`                                                                         |
-| **Memory**      | `pen_heap_snapshot` · `pen_heap_diff` · `pen_heap_track` · `pen_heap_sampling`                                                                   |
-| **CPU**         | `pen_cpu_profile` · `pen_capture_trace` · `pen_trace_insights`                                                                                   |
-| **Network**     | `pen_network_enable` · `pen_network_waterfall` · `pen_network_request` · `pen_network_blocking`                                                  |
-| **Coverage**    | `pen_js_coverage` · `pen_css_coverage`                                                                                                           |
-| **Source**      | `pen_list_sources` · `pen_source_content` · `pen_search_source`                                                                                  |
-| **Console**     | `pen_console_enable` · `pen_console_messages`                                                                                                    |
-| **Lighthouse**  | `pen_lighthouse`                                                                                                                                 |
-| **Utility**     | `pen_status` · `pen_list_pages` · `pen_select_page` · `pen_navigate` · `pen_collect_garbage` · `pen_screenshot` · `pen_emulate` · `pen_evaluate` |
-
-Full schemas: [Tool Catalog](/docs/tool-catalog)
-
-## Architecture
+PEN connects to Chrome, runs `pen_performance_metrics` via CDP, and returns:
 
 ```
-AI Assistant ◄── stdio/JSON-RPC ──► PEN (Go) ── CDP/WebSocket ──► Chrome (localhost:9222)
+┌ Performance Metrics
+│ Metric              │ Value    │ Status
+│ JSHeapUsedSize      │ 82.4 MB  │ ⚠ High
+│ Nodes               │ 4,521    │
+│ LayoutCount         │ 12       │
+│ RecalcStyleCount    │ 8        │
+│ ScriptDuration      │ 1.23s    │ ⚠ Slow
+└
 ```
 
-```
-cmd/pen/          Entry point, flags, signals
-internal/
-  cdp/            CDP connection, target management
-  server/         MCP server, locking, progress
-  tools/          Tool handlers (one file per category)
-  format/         Output formatting
-  security/       Validation, rate limiting, temp files
-```
+The LLM reads this, identifies the high heap usage and slow script duration, and suggests fixes — all without you touching DevTools.
 
-New in this release: `console.go` (real-time console capture via Runtime CDP domain), `lighthouse.go` (Lighthouse CLI integration), `pen_navigate` in `utility.go` (browser navigation control), and `pen_trace_insights` in `cpu.go` (offline trace analysis engine).
+## Key Design Decisions
 
-## Security
+| Decision       | Choice                     | Why                                                             |
+| -------------- | -------------------------- | --------------------------------------------------------------- |
+| Language       | Go 1.24                    | Single binary, chromedp + MCP Go SDK                            |
+| Transport      | stdio (default), HTTP      | stdio for IDE spawning; HTTP for shared/remote                  |
+| CDP            | Attach to existing browser | Never launches a browser — your dev browser is already running  |
+| Large payloads | Stream to disk             | Heap snapshots can exceed 1 GB; PEN uses constant memory        |
+| Security       | Layered gates              | Eval gating, expression blocklist, path validation, rate limits |
 
-- **Localhost only** — rejects remote CDP URLs
-- **No browser launch** — attaches to existing browser
-- **Eval gated** — `pen_evaluate` needs `--allow-eval`
-- **Expression blocklist** — blocks `fetch`, `document.cookie`, `eval`, etc. even with eval on
-- **Path sandboxing** — source tools can't escape `--project-root`
-- **Temp isolation** — snapshots/traces go to `$TMPDIR/pen/` with `0600` perms
-- **Rate limiting** — cooldowns on heap snapshots, traces, and other heavy ops
+## vs chrome-devtools-mcp
+
+Google maintains [`chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp) — a general DevTools MCP server for navigation, DOM, screenshots, network, traces, memory, and Lighthouse.
+
+PEN is performance-focused: differential heap analysis (multi-snapshot leak detection), streaming architecture for multi-GB payloads, Go single binary (no Node.js runtime), and every tool designed to answer "why is this slow?" rather than "what's on the page?". The two can complement each other.
 
 ## Docs
 
-| Doc                                            | What's in it                                   |
-| ---------------------------------------------- | ---------------------------------------------- |
-| [Getting Started](/docs/install)               | Install, browser setup, IDE config             |
-| [Running PEN](/docs/running)                   | Usage, Docker, server deploys, troubleshooting |
-| [Tool Catalog](/docs/tool-catalog)             | Every tool's params and output                 |
-| [Security Model](/docs/security-model)         | Threat model, defenses                         |
-| [System Architecture](/docs/system-architecture) | Design and tech stack                        |
+| Section                                  | Description                                    |
+| ---------------------------------------- | ---------------------------------------------- |
+| [Installation](/docs/install)            | Install, browser setup, IDE config, `pen init` |
+| [Running PEN](/docs/running)             | Flags, Docker, server deploys                  |
+| [Tool Reference](/docs/tool-catalog)     | Every tool's params and output                 |
+| [Workflows](/docs/workflows)             | Common tool chains and recipes                 |
+| [Troubleshooting](/docs/troubleshooting) | Common issues and fixes                        |
+| [Security](/docs/security)               | Threat model and defenses                      |
+| [Architecture](/docs/architecture)       | System design (for contributors)               |

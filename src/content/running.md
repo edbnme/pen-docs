@@ -1,6 +1,6 @@
 # Running PEN
 
-## Local
+## Local Usage
 
 ```bash
 pen                                          # defaults: stdio, localhost:9222
@@ -10,21 +10,21 @@ pen --allow-eval --project-root /my/project
 
 PEN prints `PEN ready` to stderr and waits for an MCP client on stdin/stdout. In normal use your IDE launches it automatically — you don't run it by hand.
 
-### Flags
+## Flags
 
-| Flag             | Default                 | Purpose                                        |
-| ---------------- | ----------------------- | ---------------------------------------------- |
-| `--cdp-url`      | `http://localhost:9222` | CDP endpoint                                   |
-| `--transport`    | `stdio`                 | `stdio`, `http`, or `sse`                      |
-| `--addr`         | `localhost:6100`        | Bind address for HTTP/SSE                      |
-| `--allow-eval`   | `false`                 | Enable `pen_evaluate` (executes JS in browser) |
-| `--project-root` | `.`                     | Sandbox for source tool file paths             |
-| `--log-level`    | `info`                  | `debug` / `info` / `warn` / `error`            |
-| `--version`      | —                       | Print version and exit                         |
+| Flag             | Default                 | Purpose                                    |
+| ---------------- | ----------------------- | ------------------------------------------ |
+| `--cdp-url`      | `http://localhost:9222` | CDP endpoint                               |
+| `--transport`    | `stdio`                 | `stdio`, `http`, or `sse`                  |
+| `--addr`         | `localhost:6100`        | Bind address for HTTP/SSE                  |
+| `--allow-eval`   | `false`                 | Enable `pen_evaluate` (runs JS in browser) |
+| `--project-root` | `.`                     | Sandbox for source file paths              |
+| `--log-level`    | `info`                  | `debug` / `info` / `warn` / `error`        |
+| `--version`      | —                       | Print version and exit                     |
 
-Both `-flag` and `--flag` work.
+Both `-flag` and `--flag` work. All flags are optional.
 
-### HTTP Transport
+## HTTP Transport
 
 For network-accessible use instead of stdio:
 
@@ -32,9 +32,7 @@ For network-accessible use instead of stdio:
 pen --transport http --addr localhost:6100
 ```
 
-Serves MCP at `http://localhost:6100/mcp`. The `sse` transport works the same way.
-
----
+Serves MCP at `http://localhost:6100/mcp`. The `sse` transport works the same way — both use `mcp.NewStreamableHTTPHandler` internally.
 
 ## Browser Setup
 
@@ -60,8 +58,6 @@ google-chrome --remote-debugging-port=9222
 ```
 
 Verify: `http://localhost:9222/json` should return a JSON array of open tabs.
-
----
 
 ## IDE Config
 
@@ -106,10 +102,6 @@ Your editor spawns PEN as a child process. Configure once, then forget about it.
 }
 ```
 
-If `pen` isn't on PATH, use the full binary path in the `command` field.
-
----
-
 ## Building from Source
 
 ```bash
@@ -118,32 +110,20 @@ go build -o pen ./cmd/pen        # Linux / macOS
 go build -o pen.exe ./cmd/pen    # Windows
 ```
 
-Needs Go 1.23+. Dependencies download automatically.
+Requires Go 1.24+. Dependencies download automatically.
 
----
-
-## Server / CI
-
-PEN connects to a local browser via CDP. CDP is locked to localhost — that's a security choice, not a bug.
-
-### Headless Chrome on the same box
+### Production Build
 
 ```bash
-# Install Chrome (Debian/Ubuntu)
-apt-get install -y google-chrome-stable
-
-# Launch headless
-google-chrome --headless --no-sandbox --disable-gpu \
-  --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 &
-
-# Run PEN
-pen --cdp-url http://127.0.0.1:9222
+go build -ldflags "-s -w -X main.version=v1.0.0" -o pen ./cmd/pen
 ```
 
-### Docker
+Cross-compiled via GoReleaser for linux/darwin/windows on amd64 and arm64.
+
+## Docker
 
 ```dockerfile
-FROM golang:1.23-bookworm AS builder
+FROM golang:1.24-bookworm AS builder
 WORKDIR /app
 COPY . .
 RUN go build -o pen ./cmd/pen
@@ -157,7 +137,19 @@ CMD ["sh", "-c", "google-chrome --headless --no-sandbox --disable-gpu --remote-d
 
 Use a real process manager (supervisord, etc.) in production instead of backgrounding Chrome with `&`.
 
-### SSH tunnel
+## Server / CI
+
+PEN connects to a local browser via CDP. CDP is locked to localhost — that's a security choice, not a bug.
+
+### Headless Chrome
+
+```bash
+google-chrome --headless --no-sandbox --disable-gpu \
+  --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 &
+pen --cdp-url http://127.0.0.1:9222
+```
+
+### SSH Tunnel
 
 Forward a remote CDP port to localhost:
 
@@ -166,34 +158,19 @@ ssh -L 9222:localhost:9222 user@server
 pen --cdp-url http://localhost:9222
 ```
 
-### Security notes
+### Security Notes
 
 - Never expose port 9222 to the network
 - `--no-sandbox` only in containers, not bare metal
 - `--allow-eval` only in trusted environments
 - Always set `--project-root` in production
 
----
-
 ## Optional: Lighthouse CLI
 
-The `pen_lighthouse` tool runs full Lighthouse audits against your page. It requires the Lighthouse CLI installed separately:
+The `pen_lighthouse` tool runs full Lighthouse audits. It requires the Lighthouse CLI installed separately:
 
 ```bash
 npm install -g lighthouse
 ```
 
-If Lighthouse isn't installed, all other PEN tools work normally — `pen_lighthouse` will just return a helpful error telling you how to install it.
-
----
-
-## Troubleshooting
-
-| Problem                                  | Fix                                                                    |
-| ---------------------------------------- | ---------------------------------------------------------------------- |
-| `CDP connect failed: connection refused` | Browser not running or wrong port. Check `http://localhost:9222/json`. |
-| `invalid CDP URL`                        | PEN only allows localhost / 127.0.0.1                                  |
-| `no targets found`                       | Open at least one tab                                                  |
-| `pen: command not found`                 | Binary not on PATH — use full path or install via Homebrew/Scoop       |
-| Rate limit errors                        | Wait the cooldown or restart PEN                                       |
-| IDE doesn't see tools                    | Restart IDE after editing MCP config                                   |
+If Lighthouse isn't installed, all other PEN tools work normally — `pen_lighthouse` returns a helpful error explaining how to install it.

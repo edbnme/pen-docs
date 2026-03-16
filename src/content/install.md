@@ -1,4 +1,4 @@
-# Getting Started
+# Installation
 
 ## What You Need
 
@@ -13,7 +13,7 @@ That's it. No Go, no Node.js — just download the binary.
 npm install -g lighthouse
 ```
 
-All other PEN tools work without it.
+All other 29 PEN tools work without it.
 
 ## Quick Install (Recommended)
 
@@ -33,9 +33,19 @@ irm https://raw.githubusercontent.com/edbnme/pen/main/install.ps1 | iex
 pen init
 ```
 
-`pen init` walks you through everything — IDE selection, browser setup, config generation, and connection verification.
+### The `pen init` Wizard
 
-## Install PEN
+`pen init` is an interactive terminal wizard (built with [charmbracelet/huh](https://github.com/charmbracelet/huh)) that walks you through the complete setup:
+
+1. **IDE selection** — picks VS Code, Cursor, or Claude Desktop
+2. **Browser detection** — finds Chrome, Edge, or Brave on your system
+3. **Config generation** — writes the correct MCP config file for your IDE
+4. **Browser launch** — optionally starts your browser with the debug flag
+5. **Connection test** — verifies PEN can reach Chrome's debug port
+
+Run it after any install method. It handles everything.
+
+## Package Managers
 
 ### Homebrew (macOS / Linux)
 
@@ -50,7 +60,7 @@ scoop bucket add pen https://github.com/edbnme/scoop-pen
 scoop install pen
 ```
 
-### GitHub Releases
+## GitHub Releases
 
 Grab the latest binary from the [Releases page](https://github.com/edbnme/pen/releases/latest).
 
@@ -64,15 +74,15 @@ sudo mv pen /usr/local/bin/
 
 **Windows:** Download the `.zip` from releases, extract `pen.exe`, put it somewhere on your `PATH`.
 
-### go install
+## go install
 
 ```bash
 go install github.com/edbnme/pen/cmd/pen@latest
 ```
 
-Needs Go 1.23+. Binary goes to `$(go env GOPATH)/bin` — make sure that's on your `PATH`.
+Requires Go 1.24+. Binary goes to `$(go env GOPATH)/bin` — make sure that's on your `PATH`.
 
-### From source
+## From Source
 
 ```bash
 git clone https://github.com/edbnme/pen.git
@@ -81,11 +91,13 @@ go build -o pen ./cmd/pen        # Linux / macOS
 go build -o pen.exe ./cmd/pen    # Windows
 ```
 
-### Verify
+Requires Go 1.24+. Dependencies download automatically.
+
+## Verify
 
 ```bash
 pen --version
-# pen 0.x.x (or "pen dev" when built without version flags)
+# pen v0.x.x (or "pen dev" when built without version flags)
 ```
 
 ## Start Your Browser
@@ -114,13 +126,13 @@ open -a "Google Chrome" --args --remote-debugging-port=9222
 google-chrome --remote-debugging-port=9222
 ```
 
-Verify: open `http://localhost:9222/json` in a new tab — you should see a JSON array of open tabs.
+**Verify:** open `http://localhost:9222/json` in a new tab — you should see a JSON array of open tabs.
 
 > **Still not loading?** The browser wasn't fully closed before relaunch. On Windows, open Task Manager (`Ctrl+Shift+Esc`) and end all Chrome/Edge processes. On macOS, run `killall "Google Chrome"` then relaunch.
 
 ## Configure Your IDE
 
-PEN runs as a child process of your editor — you configure it once and the editor handles launching.
+PEN runs as a child process of your editor — configure it once and the editor handles launching.
 
 ### VS Code + GitHub Copilot
 
@@ -181,13 +193,3 @@ Claude Desktop doesn't support `${workspaceFolder}` — use the full path.
 3. Ask your AI: _"Check the performance metrics of this page"_
 
 PEN connects to the browser, runs the profiling, and returns results. Logs go to stderr — check the MCP output panel in your IDE if something looks wrong.
-
-## Troubleshooting
-
-| Problem                  | Fix                                                                                      |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `pen: command not found` | Add the binary location to PATH, or use the full path in IDE config                      |
-| `CDP connect failed`     | Browser not running with `--remote-debugging-port=9222`. Close all windows and relaunch. |
-| `no targets found`       | Open at least one tab                                                                    |
-| `invalid CDP URL`        | PEN only allows localhost connections                                                    |
-| PEN doesn't respond      | Restart the IDE after editing MCP config                                                 |
