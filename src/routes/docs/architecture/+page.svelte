@@ -19,15 +19,15 @@
 
   <Mermaid
     code={`flowchart TB
-    IDE["IDE / LLM Client<br/>(Cursor, VS Code, Claude Desktop)"]
+    IDE["IDE / LLM Client<br>(Cursor, VS Code, Claude Desktop)"]
     IDE -->|"MCP (stdio or HTTP)"| Server
 
     subgraph PEN["PEN Server (cmd/pen)"]
-        Server["MCP Server<br/>server/"]
-        Tools["Tool Handlers<br/>tools/"]
-        Security["Security<br/>security/"]
-        Format["Format<br/>format/"]
-        CDP["CDP Client<br/>cdp/"]
+        Server["MCP Server<br>server/"]
+        Tools["Tool Handlers<br>tools/"]
+        Security["Security<br>security/"]
+        Format["Format<br>format/"]
+        CDP["CDP Client<br>cdp/"]
 
         Server --> Tools
         Tools --> Security
@@ -35,7 +35,7 @@
         Tools --> Format
     end
 
-    CDP -->|"CDP (WebSocket)"| Chrome["Chrome / Chromium<br/>(--remote-debugging-port=9222)"]`}
+    CDP -->|"CDP (WebSocket)"| Chrome["Chrome / Chromium<br>(--remote-debugging-port=9222)"]`}
   />
 
   <h2 id="package-map">Package Map</h2>
@@ -83,18 +83,41 @@ internal/
 
   <div class="table-wrapper">
     <table>
-      <thead><tr><th>Dependency</th><th>Version</th><th>Purpose</th></tr></thead>
+      <thead><tr><th>Dependency</th><th>Version</th><th>Purpose</th></tr></thead
+      >
       <tbody>
-        <tr><td><code>github.com/modelcontextprotocol/go-sdk</code></td><td>v1.3.1</td><td>MCP server, transports, types</td></tr>
-        <tr><td><code>github.com/chromedp/chromedp</code></td><td>v0.13.6</td><td>CDP connection and browser automation</td></tr>
-        <tr><td><code>github.com/chromedp/cdproto</code></td><td>pinned</td><td>Auto-generated CDP type bindings</td></tr>
-        <tr><td><code>github.com/charmbracelet/huh</code></td><td>v1.0.0</td><td>Interactive terminal wizard (<code>pen init</code>)</td></tr>
-        <tr><td><code>github.com/charmbracelet/lipgloss</code></td><td>v1.1.0</td><td>Terminal styling for <code>pen init</code> output</td></tr>
+        <tr
+          ><td><code>github.com/modelcontextprotocol/go-sdk</code></td><td
+            >v1.3.1</td
+          ><td>MCP server, transports, types</td></tr
+        >
+        <tr
+          ><td><code>github.com/chromedp/chromedp</code></td><td>v0.13.6</td><td
+            >CDP connection and browser automation</td
+          ></tr
+        >
+        <tr
+          ><td><code>github.com/chromedp/cdproto</code></td><td>pinned</td><td
+            >Auto-generated CDP type bindings</td
+          ></tr
+        >
+        <tr
+          ><td><code>github.com/charmbracelet/huh</code></td><td>v1.0.0</td><td
+            >Interactive terminal wizard (<code>pen init</code>)</td
+          ></tr
+        >
+        <tr
+          ><td><code>github.com/charmbracelet/lipgloss</code></td><td>v1.1.0</td
+          ><td>Terminal styling for <code>pen init</code> output</td></tr
+        >
       </tbody>
     </table>
   </div>
 
-  <p>Go version: <strong>1.24.2</strong>. No runtime dependencies beyond the standard library and the above.</p>
+  <p>
+    Go version: <strong>1.24.2</strong>. No runtime dependencies beyond the
+    standard library and the above.
+  </p>
 
   <h2 id="entry-point-flow">Entry Point Flow</h2>
 
@@ -102,28 +125,48 @@ internal/
 
   <Mermaid
     code={`flowchart TD
-    Start([pen starts]) --> InitCheck{"args[1] = init?"}
-    InitCheck -->|Yes| Wizard["Run interactive wizard<br/>(charmbracelet/huh)"]
+    Start([pen starts]) --> InitCheck{args 1 = init?}
+    InitCheck -->|Yes| Wizard["Run interactive wizard<br>(charmbracelet/huh)"]
     Wizard --> Done([Exit])
     InitCheck -->|No| Flags[Parse flags]
-    Flags --> Validate["Validate CDP URL<br/>(localhost-only)"]
-    Validate --> Signal["Set up signal context<br/>(SIGINT, SIGTERM)"]
-    Signal --> Connect["Create CDP client + reconnect<br/>(3 retries, exponential backoff)"]
+    Flags --> Validate["Validate CDP URL<br>(localhost-only)"]
+    Validate --> Signal["Set up signal context<br>(SIGINT, SIGTERM)"]
+    Signal --> Connect["Create CDP client + reconnect<br>(3 retries, exponential backoff)"]
     Connect --> Server[Create MCP server]
     Server --> Register[Register all 30 tools]
-    Register --> Run["Start server on transport<br/>(stdio / SSE / HTTP)"]
+    Register --> Run["Start server on transport<br>(stdio / SSE / HTTP)"]
     Run --> Cleanup[Clean temp files]
     Cleanup --> Done`}
   />
 
   <ol>
-    <li>Check for the <code>"init"</code> subcommand — if present, run the interactive wizard</li>
-    <li>Parse flags (<code>--cdp-url</code>, <code>--transport</code>, <code>--addr</code>, <code>--allow-eval</code>, <code>--project-root</code>, <code>--log-level</code>)</li>
-    <li>Validate the CDP URL via <code>security.ValidateCDPURL</code> (localhost only)</li>
+    <li>
+      Check for the <code>"init"</code> subcommand — if present, run the interactive
+      wizard
+    </li>
+    <li>
+      Parse flags (<code>--cdp-url</code>, <code>--transport</code>,
+      <code>--addr</code>, <code>--allow-eval</code>,
+      <code>--project-root</code>, <code>--log-level</code>)
+    </li>
+    <li>
+      Validate the CDP URL via <code>security.ValidateCDPURL</code> (localhost only)
+    </li>
     <li>Wire up signal handling (<code>SIGINT</code>, <code>SIGTERM</code>)</li>
-    <li>Connect to Chrome with retry: <code>cdp.NewClient(url, logger)</code> → <code>client.Reconnect(ctx, 3)</code> (3 attempts, backoff from 500ms to 10s)</li>
-    <li>Stand up the MCP server: <code>server.New(cdpClient, &Config{'{...}'})</code></li>
-    <li>Register all 30 tools: <code>tools.RegisterAll(server.Server(), deps)</code></li>
+    <li>
+      Connect to Chrome with retry: <code>cdp.NewClient(url, logger)</code> →
+      <code>client.Reconnect(ctx, 3)</code> (3 attempts, backoff from 500ms to 10s)
+    </li>
+    <li>
+      Stand up the MCP server: <code
+        >server.New(cdpClient, &Config{"{...}"})</code
+      >
+    </li>
+    <li>
+      Register all 30 tools: <code
+        >tools.RegisterAll(server.Server(), deps)</code
+      >
+    </li>
     <li>Start serving on the configured transport</li>
     <li>Clean up temp files on exit (deferred)</li>
   </ol>
@@ -140,18 +183,18 @@ internal/
     participant CDPClient as CDP Client (cdp/)
     participant Chrome
 
-    LLM->>+Server: CallToolRequest (pen_heap_snapshot)
-    Server->>+Handler: dispatch to handler
+    LLM->>Server: CallToolRequest (pen_heap_snapshot)
+    Server->>Handler: dispatch to handler
     Handler->>Handler: rate limit check
     Handler->>Handler: acquire OperationLock
-    Handler->>+CDPClient: get chromedp context
-    CDPClient->>+Chrome: enable domain + register listeners
+    Handler->>CDPClient: get chromedp context
+    CDPClient->>Chrome: enable domain + register listeners
     Chrome-->>CDPClient: stream events (heap chunks)
     Note right of CDPClient: Chunks streamed to temp file
-    CDPClient-->>-Handler: operation complete
+    CDPClient-->>Handler: operation complete
     Handler->>Handler: analyze from disk + format output
-    Handler-->>-Server: CallToolResult (Markdown)
-    Server-->>-LLM: structured analysis`}
+    Handler-->>Server: CallToolResult (Markdown)
+    Server-->>LLM: structured analysis`}
   />
 
   <h2 id="key-type-signatures">Key Type Signatures</h2>
@@ -310,8 +353,8 @@ defer release()`}
   <h3 id="context-propagation">Context Propagation</h3>
 
   <p>
-    Every handler gets a <code>context.Context</code> from MCP. If the client
-    disconnects mid-operation:
+    Every handler gets a <code>context.Context</code> from MCP. If the client disconnects
+    mid-operation:
   </p>
 
   <ol>
@@ -343,23 +386,91 @@ defer release()`}
     <table>
       <thead><tr><th>Constant</th><th>Value</th><th>Location</th></tr></thead>
       <tbody>
-        <tr><td>Max console entries</td><td>1,000</td><td><code>tools/console.go</code></td></tr>
-        <tr><td>Console eviction batch</td><td>100 (oldest)</td><td><code>tools/console.go</code></td></tr>
-        <tr><td>Max debugger scripts</td><td>500</td><td><code>tools/source.go</code></td></tr>
-        <tr><td>Max heap snapshots retained</td><td>20</td><td><code>tools/memory.go</code></td></tr>
-        <tr><td>Console text truncation</td><td>2,000 chars</td><td><code>tools/console.go</code></td></tr>
-        <tr><td>Trace file max size</td><td>100 MB</td><td><code>tools/cpu.go</code></td></tr>
-        <tr><td>CPU profile duration</td><td>1–30 seconds</td><td><code>tools/cpu.go</code></td></tr>
-        <tr><td>CPU sampling interval min</td><td>10 µs</td><td><code>tools/cpu.go</code></td></tr>
-        <tr><td>Default coverage topN</td><td>20</td><td><code>tools/coverage.go</code></td></tr>
-        <tr><td>Network large asset threshold</td><td>100 KB</td><td><code>tools/network.go</code></td></tr>
-        <tr><td>Default waterfall limit</td><td>50 requests</td><td><code>tools/network.go</code></td></tr>
-        <tr><td>Long task threshold</td><td>50 ms</td><td><code>tools/cpu.go</code></td></tr>
-        <tr><td>Frame drop threshold</td><td>33.3 ms (30fps)</td><td><code>tools/cpu.go</code></td></tr>
-        <tr><td>Heap sampling interval</td><td>32,768 bytes</td><td><code>tools/memory.go</code></td></tr>
-        <tr><td>Default trace categories</td><td>6 categories</td><td><code>tools/cpu.go</code></td></tr>
-        <tr><td>Temp dir permissions</td><td>0700</td><td><code>security/validate.go</code></td></tr>
-        <tr><td>Temp file permissions</td><td>0600</td><td><code>security/validate.go</code></td></tr>
+        <tr
+          ><td>Max console entries</td><td>1,000</td><td
+            ><code>tools/console.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Console eviction batch</td><td>100 (oldest)</td><td
+            ><code>tools/console.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Max debugger scripts</td><td>500</td><td
+            ><code>tools/source.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Max heap snapshots retained</td><td>20</td><td
+            ><code>tools/memory.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Console text truncation</td><td>2,000 chars</td><td
+            ><code>tools/console.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Trace file max size</td><td>100 MB</td><td
+            ><code>tools/cpu.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>CPU profile duration</td><td>1–30 seconds</td><td
+            ><code>tools/cpu.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>CPU sampling interval min</td><td>10 µs</td><td
+            ><code>tools/cpu.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Default coverage topN</td><td>20</td><td
+            ><code>tools/coverage.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Network large asset threshold</td><td>100 KB</td><td
+            ><code>tools/network.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Default waterfall limit</td><td>50 requests</td><td
+            ><code>tools/network.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Long task threshold</td><td>50 ms</td><td
+            ><code>tools/cpu.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Frame drop threshold</td><td>33.3 ms (30fps)</td><td
+            ><code>tools/cpu.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Heap sampling interval</td><td>32,768 bytes</td><td
+            ><code>tools/memory.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Default trace categories</td><td>6 categories</td><td
+            ><code>tools/cpu.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Temp dir permissions</td><td>0700</td><td
+            ><code>security/validate.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Temp file permissions</td><td>0600</td><td
+            ><code>security/validate.go</code></td
+          ></tr
+        >
       </tbody>
     </table>
   </div>

@@ -1,11 +1,11 @@
 /* Inline code */
 .prose code:not(pre code) {
-  @apply text-[0.8125rem] py-0.5 px-1.5 bg-gray-100 dark:bg-gray-800 rounded text-pink-700 dark:text-pink-400 font-medium;
+  @apply text-[0.8125rem] py-0.5 px-1.5 bg-gray-100 dark:bg-gray-800/80 rounded-md text-gray-800 dark:text-gray-200 font-medium;
 }
 
 /* Code block container */
 .prose .code-block {
-  @apply relative my-4;
+  @apply relative my-6;
 }
 .prose .code-block pre {
   @apply m-0;
@@ -13,19 +13,19 @@
 
 /* Language label */
 .prose .code-lang {
-  @apply absolute top-2 right-11 text-[0.65rem] font-mono text-gray-400 dark:text-gray-500 uppercase tracking-wider select-none pointer-events-none;
+  @apply absolute top-2.5 right-12 text-[0.625rem] font-mono text-gray-400 dark:text-gray-500 uppercase tracking-widest select-none pointer-events-none;
 }
 
 /* Copy button */
 .prose .copy-btn {
-  @apply absolute top-2 right-2 p-1 rounded-md border border-transparent bg-transparent text-gray-400 cursor-pointer opacity-0 z-[1];
-  transition: all 0.15s;
+  @apply absolute top-2 right-2 p-1.5 rounded-lg border border-transparent bg-transparent text-gray-400 cursor-pointer opacity-0 z-[1];
+  transition: all 0.2s ease;
 }
 .prose .code-block:hover .copy-btn {
   @apply opacity-100;
 }
 .prose .copy-btn:hover {
-  @apply text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600;
+  @apply text-gray-600 dark:text-gray-300 bg-white/80 dark:bg-white/10 border-gray-200 dark:border-gray-700;
 }
 .prose .copy-btn.copied {
   @apply text-emerald-600 dark:text-emerald-400 opacity-100;
@@ -33,7 +33,7 @@
 
 /* Pre blocks */
 .prose pre {
-  @apply my-4 p-4 bg-slate-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-x-auto text-[0.8125rem] leading-relaxed;
+  @apply my-6 p-4 bg-gray-50 dark:bg-gray-900/80 border border-gray-200 dark:border-gray-800 rounded-xl overflow-x-auto text-[0.8125rem] leading-relaxed;
 }
 .prose pre code {
   @apply bg-transparent p-0 text-inherit font-normal;

@@ -18,9 +18,14 @@
 
   <h2 id="connection-issues">Connection Issues</h2>
 
-  <h3 id="browser-not-running-or-wrong-port">Browser not running or wrong port</h3>
+  <h3 id="browser-not-running-or-wrong-port">
+    Browser not running or wrong port
+  </h3>
 
-  <p><strong>Symptom:</strong> <code>CDP connect failed: connection refused</code></p>
+  <p>
+    <strong>Symptom:</strong>
+    <code>CDP connect failed: connection refused</code>
+  </p>
 
   <p>
     <strong>Fix:</strong> The browser wasn't launched with
@@ -41,14 +46,13 @@ google-chrome --remote-debugging-port=9222`}
   />
 
   <p>
-    Verify: <code>http://localhost:9222/json</code> should return a JSON array.
-    If it doesn't, the browser wasn't fully killed before relaunch.
+    Verify: <code>http://localhost:9222/json</code> should return a JSON array. If
+    it doesn't, the browser wasn't fully killed before relaunch.
   </p>
 
   <p>
-    <strong>Windows tip:</strong> Open Task Manager
-    (<code>Ctrl+Shift+Esc</code>) and end all Chrome/Edge processes before
-    relaunching.
+    <strong>Windows tip:</strong> Open Task Manager (<code>Ctrl+Shift+Esc</code
+    >) and end all Chrome/Edge processes before relaunching.
   </p>
 
   <p>
@@ -61,8 +65,7 @@ google-chrome --remote-debugging-port=9222`}
   <p><strong>Symptom:</strong> <code>no targets found</code></p>
 
   <p>
-    <strong>Fix:</strong> Open a tab. PEN needs at least one page target to work
-    with.
+    <strong>Fix:</strong> Open a tab. PEN needs at least one page target to work with.
   </p>
 
   <h3 id="invalid-cdp-url">Invalid CDP URL</h3>
@@ -83,15 +86,20 @@ pen --cdp-url http://localhost:9222`}
 
   <h3 id="connection-drops-mid-operation">Connection drops mid-operation</h3>
 
-  <p><strong>Symptom:</strong> <code>Browser disconnected during operation</code></p>
+  <p>
+    <strong>Symptom:</strong> <code>Browser disconnected during operation</code>
+  </p>
 
-  <p><strong>Cause:</strong> Browser crashed or tab closed during a heap snapshot or trace.</p>
+  <p>
+    <strong>Cause:</strong> Browser crashed or tab closed during a heap snapshot or
+    trace.
+  </p>
 
   <p>
     <strong>What PEN does:</strong> Cleans up partial temp files via
     <code>defer</code>, releases domain locks, returns <code>isError</code>
-    explaining what happened. On the next call, PEN tries to reconnect (up to 3
-    retries, exponential backoff from 500ms to 10s).
+    explaining what happened. On the next call, PEN tries to reconnect (up to 3 retries,
+    exponential backoff from 500ms to 10s).
   </p>
 
   <h2 id="ide-issues">IDE Issues</h2>
@@ -99,21 +107,26 @@ pen --cdp-url http://localhost:9222`}
   <h3><code>pen: command not found</code></h3>
 
   <p>
-    <strong>Fix:</strong> The binary isn't on your PATH. Either add it, or use
-    the full path in your IDE config:
+    <strong>Fix:</strong> The binary isn't on your PATH. Either add it, or use the
+    full path in your IDE config:
   </p>
 
-  <CodeBlock lang="json" code="&quot;command&quot;: &quot;/full/path/to/pen&quot;" />
+  <CodeBlock
+    lang="json"
+    code="&quot;command&quot;: &quot;/full/path/to/pen&quot;"
+  />
 
   <h3>IDE doesn't see PEN tools</h3>
 
-  <p><strong>Fix:</strong> Restart your editor. Most IDEs don't hot-reload MCP configs.</p>
+  <p>
+    <strong>Fix:</strong> Restart your editor. Most IDEs don't hot-reload MCP configs.
+  </p>
 
   <h3>PEN doesn't respond</h3>
 
   <p>
-    <strong>Fix:</strong> Check the MCP output panel. PEN logs to stderr — look
-    for connection errors or startup failures there.
+    <strong>Fix:</strong> Check the MCP output panel. PEN logs to stderr — look for
+    connection errors or startup failures there.
   </p>
 
   <h2 id="tool-specific-issues">Tool-Specific Issues</h2>
@@ -125,7 +138,9 @@ pen --cdp-url http://localhost:9222`}
     <code>pen_heap_snapshot has a 10s cooldown. Try again in 6s</code>
   </p>
 
-  <p><strong>Fix:</strong> Wait it out. Rate limits prevent resource exhaustion:</p>
+  <p>
+    <strong>Fix:</strong> Wait it out. Rate limits prevent resource exhaustion:
+  </p>
 
   <div class="table-wrapper">
     <table>
@@ -152,8 +167,8 @@ pen --cdp-url http://localhost:9222`}
   </p>
 
   <p>
-    <strong>Fix:</strong> Let the first operation finish. PEN uses domain-level
-    locks to keep results clean — this is by design.
+    <strong>Fix:</strong> Let the first operation finish. PEN uses domain-level locks
+    to keep results clean — this is by design.
   </p>
 
   <h3 id="lighthouse-not-found">Lighthouse not found</h3>
@@ -171,7 +186,9 @@ pen --cdp-url http://localhost:9222`}
 
   <h3 id="lighthouse-timeout">Lighthouse timeout</h3>
 
-  <p><strong>Symptom:</strong> Lighthouse audit hangs or times out on complex pages.</p>
+  <p>
+    <strong>Symptom:</strong> Lighthouse audit hangs or times out on complex pages.
+  </p>
 
   <p>
     <strong>Fix:</strong> Lighthouse has its own internal timeout. If the page is
@@ -192,14 +209,14 @@ pen --cdp-url http://localhost:9222`}
   </p>
 
   <p>
-    <strong>Cause:</strong> The heap is huge (&gt;500 MB). Big enterprise SPAs
-    can do this.
+    <strong>Cause:</strong> The heap is huge (&gt;500 MB). Big enterprise SPAs can
+    do this.
   </p>
 
   <p>
-    <strong>What PEN does:</strong> Keeps streaming to disk (constant memory —
-    the snapshot never sits in RAM). Limits analysis depth to stay fast. The raw
-    data is still complete.
+    <strong>What PEN does:</strong> Keeps streaming to disk (constant memory — the
+    snapshot never sits in RAM). Limits analysis depth to stay fast. The raw data
+    is still complete.
   </p>
 
   <h3 id="trace-buffer-overflow">Trace buffer overflow</h3>
@@ -222,8 +239,8 @@ pen --cdp-url http://localhost:9222`}
   <p><strong>Symptom:</strong> Console messages appear to be missing.</p>
 
   <p>
-    <strong>Cause:</strong> The console buffer holds 1,000 messages max. When
-    full, the oldest 100 are evicted.
+    <strong>Cause:</strong> The console buffer holds 1,000 messages max. When full,
+    the oldest 100 are evicted.
   </p>
 
   <p>
@@ -240,16 +257,18 @@ pen --cdp-url http://localhost:9222`}
   </p>
 
   <p>
-    <strong>Fix:</strong> <code>pen_trace_insights</code> caps at 100 MB to
-    avoid blowing up during JSON parsing. Record shorter traces or use fewer
-    categories.
+    <strong>Fix:</strong> <code>pen_trace_insights</code> caps at 100 MB to avoid
+    blowing up during JSON parsing. Record shorter traces or use fewer categories.
   </p>
 
   <h2 id="page-and-navigation-issues">Page and Navigation Issues</h2>
 
   <h3>Page navigates during profiling</h3>
 
-  <p><strong>Cause:</strong> SPA route change or full page reload during an active profile.</p>
+  <p>
+    <strong>Cause:</strong> SPA route change or full page reload during an active
+    profile.
+  </p>
 
   <p><strong>What PEN does:</strong></p>
 
@@ -262,7 +281,9 @@ pen --cdp-url http://localhost:9222`}
 
   <p>
     <strong>Symptom:</strong>
-    <code>URL scheme is not allowed. Only HTTP and HTTPS URLs are accepted.</code>
+    <code
+      >URL scheme is not allowed. Only HTTP and HTTPS URLs are accepted.</code
+    >
   </p>
 
   <p>
@@ -271,8 +292,8 @@ pen --cdp-url http://localhost:9222`}
   </p>
 
   <p>
-    <strong>Fix:</strong> This is a security feature. Only HTTP and HTTPS URLs
-    are allowed for navigation and Lighthouse.
+    <strong>Fix:</strong> This is a security feature. Only HTTP and HTTPS URLs are
+    allowed for navigation and Lighthouse.
   </p>
 
   <h3>No forward history</h3>
@@ -283,11 +304,13 @@ pen --cdp-url http://localhost:9222`}
   </p>
 
   <p>
-    <strong>Cause:</strong> The browser has no forward navigation history from
-    the current entry.
+    <strong>Cause:</strong> The browser has no forward navigation history from the
+    current entry.
   </p>
 
-  <p><strong>Fix:</strong> You can only go forward if you've previously gone back.</p>
+  <p>
+    <strong>Fix:</strong> You can only go forward if you've previously gone back.
+  </p>
 
   <h2 id="security-issues">Security Issues</h2>
 
@@ -299,8 +322,9 @@ pen --cdp-url http://localhost:9222`}
   </p>
 
   <p>
-    <strong>Cause:</strong> The expression hit one of PEN's blocklist patterns
-    (<code>fetch</code>, <code>document.cookie</code>, <code>eval</code>,
+    <strong>Cause:</strong> The expression hit one of PEN's blocklist patterns (<code
+      >fetch</code
+    >, <code>document.cookie</code>, <code>eval</code>,
     <code>localStorage</code>, etc.).
   </p>
 
@@ -323,7 +347,7 @@ pen --cdp-url http://localhost:9222`}
   </p>
 
   <p>
-    <strong>Fix:</strong> Set <code>--project-root</code> to the correct
-    directory, or access files within the allowed path.
+    <strong>Fix:</strong> Set <code>--project-root</code> to the correct directory,
+    or access files within the allowed path.
   </p>
 </DocPage>

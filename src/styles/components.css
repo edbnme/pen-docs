@@ -1,13 +1,7 @@
 /* Mermaid diagrams */
 .prose .mermaid-container {
-  @apply my-6 p-6 border border-indigo-100 dark:border-indigo-900 rounded-xl overflow-x-auto flex justify-center;
-  background: linear-gradient(135deg, #fafbff 0%, #f0f4ff 100%);
+  @apply my-8 p-6 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-x-auto flex justify-center items-center bg-gray-50/50 dark:bg-gray-900/40 min-h-48;
   -webkit-overflow-scrolling: touch;
-}
-@media (prefers-color-scheme: dark) {
-  .prose .mermaid-container {
-    background: linear-gradient(135deg, #0f1118 0%, #111827 100%);
-  }
 }
 .prose .mermaid-container svg {
   @apply max-w-full h-auto;
@@ -18,7 +12,7 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -26,7 +20,7 @@
   }
 }
 .fade-in {
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.3s ease-out;
 }
 
 /* Slide-in animation for mobile sidebar */
@@ -39,7 +33,7 @@
   }
 }
 .animate-slide-in-left {
-  animation: slideInLeft 0.2s ease-out;
+  animation: slideInLeft 0.25s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* Print */
@@ -48,7 +42,8 @@
   .sidebar,
   .mobile-header,
   .back-to-top,
-  .toc {
+  .toc,
+  .reading-progress {
     @apply hidden;
   }
   .prose {
@@ -73,5 +68,10 @@
   animation: slide-out 0.15s ease-in;
 }
 ::view-transition-new(root) {
-  animation: slide-in 0.2s ease-out;
+  animation: slide-in 0.25s ease-out;
+}
+
+/* Focus visible ring */
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-blue-500/50 rounded-sm;
 }

@@ -17,13 +17,19 @@
 
   <p>
     PEN talks to Chrome through
-    <a href="https://github.com/chromedp/chromedp" target="_blank" rel="noopener noreferrer">chromedp</a>
+    <a
+      href="https://github.com/chromedp/chromedp"
+      target="_blank"
+      rel="noopener noreferrer">chromedp</a
+    >
     (v0.13.6), which wraps the Chrome DevTools Protocol over WebSocket.
   </p>
 
   <h2 id="connection-lifecycle">Connection Lifecycle</h2>
 
-  <p>PEN attaches to a browser that's already running. It never launches one.</p>
+  <p>
+    PEN attaches to a browser that's already running. It never launches one.
+  </p>
 
   <Mermaid
     code={`sequenceDiagram
@@ -62,8 +68,8 @@
 
   <p>
     This hands back a <code>ws://</code> URL like
-    <code>ws://localhost:9222/devtools/browser/...</code> that chromedp uses to
-    open the CDP session.
+    <code>ws://localhost:9222/devtools/browser/...</code> that chromedp uses to open
+    the CDP session.
   </p>
 
   <h3 id="connection">Connection</h3>
@@ -78,13 +84,16 @@ err := client.Reconnect(ctx, 3) // 3 retries with exponential backoff`}
     Under the hood, <code>Connect</code> calls <code>DiscoverEndpoint</code>,
     sets up a <code>chromedp.NewRemoteAllocator</code>, opens a
     <code>chromedp.NewContext</code>, and verifies with a no-op
-    <code>chromedp.Run</code>. If that fails, <code>Reconnect</code> retries
-    with exponential backoff (500ms start, 10s cap).
+    <code>chromedp.Run</code>. If that fails, <code>Reconnect</code> retries with
+    exponential backoff (500ms start, 10s cap).
   </p>
 
   <h3 id="chromedp-remote-allocator">chromedp Remote Allocator</h3>
 
-  <p>PEN uses chromedp's remote allocator (not its default browser-launching mode):</p>
+  <p>
+    PEN uses chromedp's remote allocator (not its default browser-launching
+    mode):
+  </p>
 
   <CodeBlock
     lang="go"
@@ -120,8 +129,8 @@ chromedp.Run(tabCtx) // no-op to verify connection`}
 
   <p>
     Tool handlers type-switch on events. For instance, heap snapshot streaming
-    catches <code>heapProfiler.AddHeapSnapshotChunk</code> events and writes
-    each chunk straight to a temp file.
+    catches <code>heapProfiler.AddHeapSnapshotChunk</code> events and writes each
+    chunk straight to a temp file.
   </p>
 
   <p>The listener pattern from chromedp:</p>
@@ -182,27 +191,81 @@ chromedp.Run(tabCtx) // no-op to verify connection`}
     <table>
       <thead><tr><th>Domain</th><th>Tools</th><th>Exclusive?</th></tr></thead>
       <tbody>
-        <tr><td>HeapProfiler</td><td><code>pen_heap_snapshot</code>, <code>pen_heap_diff</code>, <code>pen_heap_track</code>, <code>pen_heap_sampling</code>, <code>pen_collect_garbage</code></td><td>Yes</td></tr>
-        <tr><td>Profiler</td><td><code>pen_cpu_profile</code>, <code>pen_js_coverage</code></td><td>Yes</td></tr>
-        <tr><td>Tracing</td><td><code>pen_capture_trace</code></td><td>Yes</td></tr>
+        <tr
+          ><td>HeapProfiler</td><td
+            ><code>pen_heap_snapshot</code>, <code>pen_heap_diff</code>,
+            <code>pen_heap_track</code>, <code>pen_heap_sampling</code>,
+            <code>pen_collect_garbage</code></td
+          ><td>Yes</td></tr
+        >
+        <tr
+          ><td>Profiler</td><td
+            ><code>pen_cpu_profile</code>, <code>pen_js_coverage</code></td
+          ><td>Yes</td></tr
+        >
+        <tr
+          ><td>Tracing</td><td><code>pen_capture_trace</code></td><td>Yes</td
+          ></tr
+        >
         <tr><td>CSS</td><td><code>pen_css_coverage</code></td><td>Yes</td></tr>
-        <tr><td>Lighthouse</td><td><code>pen_lighthouse</code></td><td>Yes</td></tr>
-        <tr><td>Performance</td><td><code>pen_performance_metrics</code></td><td>No</td></tr>
-        <tr><td>Network</td><td><code>pen_network_enable</code>, <code>pen_network_waterfall</code>, <code>pen_network_request</code>, <code>pen_network_blocking</code></td><td>No</td></tr>
-        <tr><td>Page</td><td><code>pen_screenshot</code>, <code>pen_navigate</code></td><td>No</td></tr>
-        <tr><td>Runtime</td><td><code>pen_evaluate</code>, <code>pen_web_vitals</code>, <code>pen_console_enable</code>, <code>pen_console_messages</code></td><td>No</td></tr>
-        <tr><td>Emulation</td><td><code>pen_emulate</code> (CPU throttling, network conditions)</td><td>No</td></tr>
-        <tr><td>Debugger</td><td><code>pen_list_sources</code>, <code>pen_source_content</code>, <code>pen_search_source</code></td><td>No</td></tr>
-        <tr><td>IO</td><td>Trace streaming (<code>pen_capture_trace</code> uses <code>IO.read</code>/<code>IO.close</code>)</td><td>No</td></tr>
-        <tr><td>DOM</td><td><code>pen_accessibility_check</code></td><td>No</td></tr>
+        <tr
+          ><td>Lighthouse</td><td><code>pen_lighthouse</code></td><td>Yes</td
+          ></tr
+        >
+        <tr
+          ><td>Performance</td><td><code>pen_performance_metrics</code></td><td
+            >No</td
+          ></tr
+        >
+        <tr
+          ><td>Network</td><td
+            ><code>pen_network_enable</code>,
+            <code>pen_network_waterfall</code>,
+            <code>pen_network_request</code>,
+            <code>pen_network_blocking</code></td
+          ><td>No</td></tr
+        >
+        <tr
+          ><td>Page</td><td
+            ><code>pen_screenshot</code>, <code>pen_navigate</code></td
+          ><td>No</td></tr
+        >
+        <tr
+          ><td>Runtime</td><td
+            ><code>pen_evaluate</code>, <code>pen_web_vitals</code>,
+            <code>pen_console_enable</code>,
+            <code>pen_console_messages</code></td
+          ><td>No</td></tr
+        >
+        <tr
+          ><td>Emulation</td><td
+            ><code>pen_emulate</code> (CPU throttling, network conditions)</td
+          ><td>No</td></tr
+        >
+        <tr
+          ><td>Debugger</td><td
+            ><code>pen_list_sources</code>, <code>pen_source_content</code>,
+            <code>pen_search_source</code></td
+          ><td>No</td></tr
+        >
+        <tr
+          ><td>IO</td><td
+            >Trace streaming (<code>pen_capture_trace</code> uses
+            <code>IO.read</code>/<code>IO.close</code>)</td
+          ><td>No</td></tr
+        >
+        <tr
+          ><td>DOM</td><td><code>pen_accessibility_check</code></td><td>No</td
+          ></tr
+        >
       </tbody>
     </table>
   </div>
 
   <p>
-    "Exclusive" means PEN holds an <code>OperationLock</code> so two tools can't
-    fight over the same domain. If a second tool tries, it gets an immediate
-    error explaining the conflict.
+    "Exclusive" means PEN holds an <code>OperationLock</code> so two tools can't fight
+    over the same domain. If a second tool tries, it gets an immediate error explaining
+    the conflict.
   </p>
 
   <h2 id="network-event-handling">Network Event Handling</h2>
@@ -212,7 +275,9 @@ chromedp.Run(tabCtx) // no-op to verify connection`}
   <ul>
     <li><code>Network.requestWillBeSent</code> — request initiated</li>
     <li><code>Network.responseReceived</code> — response headers received</li>
-    <li><code>Network.loadingFinished</code> — request completed successfully</li>
+    <li>
+      <code>Network.loadingFinished</code> — request completed successfully
+    </li>
     <li><code>Network.loadingFailed</code> — request failed</li>
   </ul>
 
@@ -230,13 +295,15 @@ chromedp.Run(tabCtx) // no-op to verify connection`}
 
   <ul>
     <li>Only one client can control the Tracing domain at a time</li>
-    <li>HeapProfiler operations may conflict with DevTools Memory panel usage</li>
+    <li>
+      HeapProfiler operations may conflict with DevTools Memory panel usage
+    </li>
     <li>This is a Chrome limitation, not a PEN limitation</li>
   </ul>
 
   <p>
-    PEN's internal locks prevent its own tools from colliding. External conflicts
-    (e.g., DevTools Memory panel vs. PEN) show up as CDP errors, which PEN
-    passes back to the LLM.
+    PEN's internal locks prevent its own tools from colliding. External
+    conflicts (e.g., DevTools Memory panel vs. PEN) show up as CDP errors, which
+    PEN passes back to the LLM.
   </p>
 </DocPage>

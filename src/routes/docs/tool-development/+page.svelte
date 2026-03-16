@@ -22,9 +22,9 @@
 
   <Mermaid
     code={`flowchart LR
-    A["1. Define Input Struct<br/>(json + jsonschema tags)"] --> B["2. Write Tool Definition<br/>(name, description, schema)"]
-    B --> C["3. Implement Handler<br/>(rate limit → lock → CDP → format)"]
-    C --> D["4. Register in category file<br/>(mcp.AddTool)"]
+    A["1. Define Input Struct<br>(json + jsonschema tags)"] --> B["2. Write Tool Definition<br>(name, description, schema)"]
+    B --> C["3. Implement Handler<br>(rate limit → lock → CDP → format)"]
+    C --> D["4. Register in category file<br>(mcp.AddTool)"]
     D --> E["5. Wire up in RegisterAll"]`}
   />
 
@@ -38,22 +38,71 @@
     <table>
       <thead><tr><th>File</th><th>Category</th><th>Tools</th></tr></thead>
       <tbody>
-        <tr><td><code>audit.go</code></td><td>Performance</td><td><code>pen_performance_metrics</code>, <code>pen_web_vitals</code>, <code>pen_accessibility_check</code></td></tr>
-        <tr><td><code>memory.go</code></td><td>Memory</td><td><code>pen_heap_snapshot</code>, <code>pen_heap_diff</code>, <code>pen_heap_track</code>, <code>pen_heap_sampling</code></td></tr>
-        <tr><td><code>cpu.go</code></td><td>CPU</td><td><code>pen_cpu_profile</code>, <code>pen_capture_trace</code>, <code>pen_trace_insights</code></td></tr>
-        <tr><td><code>network.go</code></td><td>Network</td><td><code>pen_network_enable</code>, <code>pen_network_waterfall</code>, <code>pen_network_request</code>, <code>pen_network_blocking</code></td></tr>
-        <tr><td><code>coverage.go</code></td><td>Coverage</td><td><code>pen_js_coverage</code>, <code>pen_css_coverage</code></td></tr>
-        <tr><td><code>source.go</code></td><td>Source</td><td><code>pen_list_sources</code>, <code>pen_source_content</code>, <code>pen_search_source</code></td></tr>
-        <tr><td><code>console.go</code></td><td>Console</td><td><code>pen_console_enable</code>, <code>pen_console_messages</code></td></tr>
-        <tr><td><code>lighthouse.go</code></td><td>Lighthouse</td><td><code>pen_lighthouse</code></td></tr>
-        <tr><td><code>utility.go</code></td><td>Utility</td><td>8 tools (navigation, screenshots, eval, etc.)</td></tr>
-        <tr><td><code>status.go</code></td><td>Status</td><td><code>pen_status</code></td></tr>
+        <tr
+          ><td><code>audit.go</code></td><td>Performance</td><td
+            ><code>pen_performance_metrics</code>, <code>pen_web_vitals</code>,
+            <code>pen_accessibility_check</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>memory.go</code></td><td>Memory</td><td
+            ><code>pen_heap_snapshot</code>, <code>pen_heap_diff</code>,
+            <code>pen_heap_track</code>, <code>pen_heap_sampling</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>cpu.go</code></td><td>CPU</td><td
+            ><code>pen_cpu_profile</code>, <code>pen_capture_trace</code>,
+            <code>pen_trace_insights</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>network.go</code></td><td>Network</td><td
+            ><code>pen_network_enable</code>,
+            <code>pen_network_waterfall</code>,
+            <code>pen_network_request</code>,
+            <code>pen_network_blocking</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>coverage.go</code></td><td>Coverage</td><td
+            ><code>pen_js_coverage</code>, <code>pen_css_coverage</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>source.go</code></td><td>Source</td><td
+            ><code>pen_list_sources</code>, <code>pen_source_content</code>,
+            <code>pen_search_source</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>console.go</code></td><td>Console</td><td
+            ><code>pen_console_enable</code>,
+            <code>pen_console_messages</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>lighthouse.go</code></td><td>Lighthouse</td><td
+            ><code>pen_lighthouse</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>utility.go</code></td><td>Utility</td><td
+            >8 tools (navigation, screenshots, eval, etc.)</td
+          ></tr
+        >
+        <tr
+          ><td><code>status.go</code></td><td>Status</td><td
+            ><code>pen_status</code></td
+          ></tr
+        >
       </tbody>
     </table>
   </div>
 
   <p>
-    <code>register.go</code> has the <code>RegisterAll</code> entry point and the
+    <code>register.go</code> has the <code>RegisterAll</code> entry point and
+    the
     <code>Deps</code> struct.
   </p>
 
@@ -80,8 +129,7 @@
   <h2 id="step-2-define-the-tool">Step 2: Define the Tool</h2>
 
   <p>
-    Create an <code>mcp.Tool</code> definition with name, description, and
-    annotations:
+    Create an <code>mcp.Tool</code> definition with name, description, and annotations:
   </p>
 
   <CodeBlock
@@ -97,8 +145,8 @@
 
   <p>
     All PEN tools start with <code>pen_</code>. Write the description for LLMs —
-    it shows up in <code>tools/list</code> and that's how the model decides
-    whether to call it.
+    it shows up in <code>tools/list</code> and that's how the model decides whether
+    to call it.
   </p>
 
   <h2 id="step-3-write-the-handler">Step 3: Write the Handler</h2>
@@ -162,8 +210,8 @@
   />
 
   <p>
-    The SDK flips <code>isError: true</code> automatically. Write errors for the
-    LLM — say what happened, why, and what to try next.
+    The SDK flips <code>isError: true</code> automatically. Write errors for the LLM
+    — say what happened, why, and what to try next.
   </p>
 
   <h3>Progress Notifications</h3>
@@ -180,8 +228,8 @@
   <h2 id="step-4-register-the-tool">Step 4: Register the Tool</h2>
 
   <p>
-    Add registration to the appropriate <code>register*Tools</code> function, or
-    create a new one:
+    Add registration to the appropriate <code>register*Tools</code> function, or create
+    a new one:
   </p>
 
   <CodeBlock
@@ -223,8 +271,8 @@
   <h2 id="step-6-test-it">Step 6: Test It</h2>
 
   <p>
-    Add tests in <code>tools/tools_test.go</code> or a new file. The MCP SDK has
-    test helpers for exercising tools without a real browser.
+    Add tests in <code>tools/tools_test.go</code> or a new file. The MCP SDK has test
+    helpers for exercising tools without a real browser.
   </p>
 
   <h2 id="patterns-worth-following">Patterns Worth Following</h2>
@@ -232,8 +280,8 @@
   <h3>Output Formatting</h3>
 
   <p>
-    Always use <code>format.ToolResult</code> and <code>format.Table</code> for
-    consistent output:
+    Always use <code>format.ToolResult</code> and <code>format.Table</code> for consistent
+    output:
   </p>
 
   <CodeBlock
@@ -318,7 +366,9 @@ if topN <= 0 {
     <li>Rate limiting added if the tool is expensive</li>
     <li>Domain lock acquired if using an exclusive CDP domain</li>
     <li>Context timeout set on all CDP calls</li>
-    <li>Output uses <code>format.ToolResult</code> / <code>format.Table</code></li>
+    <li>
+      Output uses <code>format.ToolResult</code> / <code>format.Table</code>
+    </li>
     <li>Temp files cleaned up via <code>defer</code></li>
     <li>Errors explain what happened + what to try next</li>
     <li>Tests cover the happy path and key error cases</li>

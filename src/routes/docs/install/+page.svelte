@@ -18,14 +18,16 @@
 
   <ul>
     <li>A Chromium browser (Chrome, Edge, Brave)</li>
-    <li>An MCP-capable editor (VS Code + Copilot, Cursor, or Claude Desktop)</li>
+    <li>
+      An MCP-capable editor (VS Code + Copilot, Cursor, or Claude Desktop)
+    </li>
   </ul>
 
   <p>That's it. No Go, no Node.js — just download the binary.</p>
 
   <p>
-    <strong>Optional:</strong> The <code>pen_lighthouse</code> tool needs the
-    Lighthouse CLI:
+    <strong>Optional:</strong> The <code>pen_lighthouse</code> tool needs the Lighthouse
+    CLI:
   </p>
 
   <CodeBlock lang="bash" code="npm install -g lighthouse" />
@@ -34,9 +36,7 @@
 
   <h2 id="quick-install-recommended">Quick Install (Recommended)</h2>
 
-  <p>
-    One command to download PEN, then run the interactive setup wizard:
-  </p>
+  <p>One command to download PEN, then run the interactive setup wizard:</p>
 
   <p><strong>macOS / Linux:</strong></p>
 
@@ -83,20 +83,29 @@ pen init`}
     <li>Pick your browser</li>
     <li>Set the CDP port (defaults to <code>9222</code>)</li>
     <li>
-      Enable or disable <code>pen_evaluate</code> (disabled by default — it
-      lets PEN run JavaScript in the browser)
+      Enable or disable <code>pen_evaluate</code> (disabled by default — it lets PEN
+      run JavaScript in the browser)
     </li>
   </ul>
 
   <p>
-    <strong>Phase 3 — Write the config.</strong> PEN generates the correct MCP
-    config for your IDE:
+    <strong>Phase 3 — Write the config.</strong> PEN generates the correct MCP config
+    for your IDE:
   </p>
 
   <ul>
-    <li><strong>VS Code</strong> → <code>.vscode/mcp.json</code> (key: <code>"servers"</code>)</li>
-    <li><strong>Cursor</strong> → <code>.cursor/mcp.json</code> (key: <code>"mcpServers"</code>)</li>
-    <li><strong>Claude Desktop</strong> → platform-specific path (key: <code>"mcpServers"</code>)</li>
+    <li>
+      <strong>VS Code</strong> → <code>.vscode/mcp.json</code> (key:
+      <code>"servers"</code>)
+    </li>
+    <li>
+      <strong>Cursor</strong> → <code>.cursor/mcp.json</code> (key:
+      <code>"mcpServers"</code>)
+    </li>
+    <li>
+      <strong>Claude Desktop</strong> → platform-specific path (key:
+      <code>"mcpServers"</code>)
+    </li>
   </ul>
 
   <p>
@@ -106,14 +115,14 @@ pen init`}
 
   <p>
     <strong>Phase 4 — Launch the browser.</strong> Optionally opens your browser
-    with <code>--remote-debugging-port</code> set. If PEN can't launch it
-    automatically, it prints the exact command for your OS.
+    with <code>--remote-debugging-port</code> set. If PEN can't launch it automatically,
+    it prints the exact command for your OS.
   </p>
 
   <p>
     <strong>Phase 5 — Verify the connection.</strong> Tests
-    <code>http://localhost:PORT/json</code> and reports how many tabs are open.
-    If it can't connect yet, that's fine — PEN connects when your IDE starts it.
+    <code>http://localhost:PORT/json</code> and reports how many tabs are open. If
+    it can't connect yet, that's fine — PEN connects when your IDE starts it.
   </p>
 
   <p>Works after any install method.</p>
@@ -192,9 +201,8 @@ go build -o pen.exe ./cmd/pen    # Windows`}
   <h2 id="start-your-browser">Start Your Browser</h2>
 
   <p>
-    Close the browser <strong>all the way</strong> first — every window, every
-    background process. The debug port only works when Chrome launches fresh
-    with the flag.
+    Close the browser <strong>all the way</strong> first — every window, every background
+    process. The debug port only works when Chrome launches fresh with the flag.
   </p>
 
   <p><strong>macOS:</strong></p>
@@ -217,22 +225,19 @@ go build -o pen.exe ./cmd/pen    # Windows`}
 
   <p><strong>Linux:</strong></p>
 
-  <CodeBlock
-    lang="bash"
-    code="google-chrome --remote-debugging-port=9222"
-  />
+  <CodeBlock lang="bash" code="google-chrome --remote-debugging-port=9222" />
 
   <p>
-    <strong>Verify:</strong> open <code>http://localhost:9222/json</code> in a
-    new tab — you should see a JSON array of open tabs.
+    <strong>Verify:</strong> open <code>http://localhost:9222/json</code> in a new
+    tab — you should see a JSON array of open tabs.
   </p>
 
   <blockquote>
     <p>
       <strong>Still stuck?</strong> The browser wasn't fully killed before
       relaunch. On Windows, hit <code>Ctrl+Shift+Esc</code> and end all
-      Chrome/Edge processes. On macOS, <code>killall "Google Chrome"</code> and
-      try again.
+      Chrome/Edge processes. On macOS, <code>killall "Google Chrome"</code> and try
+      again.
     </p>
   </blockquote>
 
@@ -285,7 +290,9 @@ go build -o pen.exe ./cmd/pen    # Windows`}
   <ul>
     <li>
       <strong>macOS:</strong>
-      <code>~/Library/Application Support/Claude/claude_desktop_config.json</code>
+      <code
+        >~/Library/Application Support/Claude/claude_desktop_config.json</code
+      >
     </li>
     <li>
       <strong>Windows:</strong>
@@ -306,8 +313,8 @@ go build -o pen.exe ./cmd/pen    # Windows`}
   />
 
   <p>
-    Claude Desktop doesn't support <code>$&#123;workspaceFolder&#125;</code> —
-    use the full path.
+    Claude Desktop doesn't support <code>$&#123;workspaceFolder&#125;</code> — use
+    the full path.
   </p>
 
   <blockquote>

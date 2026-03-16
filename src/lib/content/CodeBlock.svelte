@@ -39,12 +39,7 @@
   {#if lang}
     <span class="code-lang">{lang}</span>
   {/if}
-  <button
-    class="copy-btn"
-    class:copied
-    aria-label="Copy code"
-    onclick={copy}
-  >
+  <button class="copy-btn" class:copied aria-label="Copy code" onclick={copy}>
     {#if copied}
       <!-- eslint-disable-next-line svelte/no-at-html-tags -- Safe: static SVG icon -->
       {@html CHECK_SVG}
@@ -53,6 +48,9 @@
       {@html COPY_SVG}
     {/if}
   </button>
-  <!-- eslint-disable-next-line svelte/no-at-html-tags -- Safe: highlight.js sanitized output -->
-  <pre><code class="hljs{lang ? ` language-${lang}` : ''}">{#if highlighted}{@html highlighted}{:else}{code}{/if}</code></pre>
+  <!-- eslint-disable svelte/no-at-html-tags -- Safe: highlight.js sanitized output -->
+  <pre><code class="hljs{lang ? ` language-${lang}` : ''}"
+      >{#if highlighted}{@html highlighted}{:else}{code}{/if}</code
+    ></pre>
+  <!-- eslint-enable svelte/no-at-html-tags -->
 </div>

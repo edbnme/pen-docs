@@ -1,31 +1,62 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
   --font-mono:
-    "JetBrains Mono", ui-monospace, "Cascadia Code", "Fira Code", monospace;
-  --color-indigo-50: #eef2ff;
-  --color-indigo-100: #e0e7ff;
-  --color-indigo-500: #6366f1;
-  --color-indigo-600: #4f46e5;
-  --color-indigo-700: #4338ca;
+    "SF Mono", "JetBrains Mono", ui-monospace, "Cascadia Code", "Fira Code",
+    monospace;
+
+  /* Neutral palette — Apple-aligned, no blue tint */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-600: #525252;
+  --color-gray-700: #404040;
+  --color-gray-800: #262626;
+  --color-gray-900: #171717;
+  --color-gray-950: #0a0a0a;
+
+  /* Override slate with neutral too */
+  --color-slate-50: #fafafa;
+  --color-slate-100: #f5f5f5;
+
+  /* Apple system blue — used sparingly */
+  --color-blue-400: #58a6ff;
+  --color-blue-500: #007aff;
+  --color-blue-600: #0066d6;
 }
 
 @layer base {
   html {
     @apply scroll-smooth antialiased;
     color-scheme: light dark;
+    -webkit-text-size-adjust: 100%;
   }
   body {
-    @apply font-sans bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100;
+    @apply font-sans bg-white text-gray-900 dark:bg-black dark:text-gray-100;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   code,
   pre {
     @apply font-mono;
   }
+
+  /* Smooth transitions for theme/hover globally */
+  *,
+  *::before,
+  *::after {
+    @apply border-gray-200 dark:border-gray-800;
+  }
 }
 
-/* Thin scrollbar */
+/* Refined scrollbar */
 ::-webkit-scrollbar {
   @apply w-1.5 h-1.5;
 }
@@ -33,8 +64,16 @@
   @apply bg-transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-sm dark:bg-gray-700;
+  @apply bg-gray-300/60 rounded-full dark:bg-gray-700/60;
 }
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-600;
+  @apply bg-gray-400/80 dark:bg-gray-600/80;
+}
+
+/* Selection colors */
+::selection {
+  @apply bg-blue-500/15 text-inherit;
+}
+::-moz-selection {
+  @apply bg-blue-500/15 text-inherit;
 }

@@ -33,9 +33,15 @@
   <ol>
     <li>Force GC to get a clean baseline</li>
     <li>Take snapshot A</li>
-    <li>Have the user reproduce the suspected leak (navigate, open/close a modal, etc.)</li>
+    <li>
+      Have the user reproduce the suspected leak (navigate, open/close a modal,
+      etc.)
+    </li>
     <li>Take snapshot B</li>
-    <li>Diff the two snapshots — PEN shows new objects, grown objects, and total delta</li>
+    <li>
+      Diff the two snapshots — PEN shows new objects, grown objects, and total
+      delta
+    </li>
   </ol>
 
   <p>
@@ -66,8 +72,13 @@
   <ol>
     <li>Navigate to the target page</li>
     <li>Capture a Chrome trace during load</li>
-    <li>Analyze the trace for long tasks (&gt;50ms), LCP, CLS, and slow resources</li>
-    <li>Check the network waterfall for large assets, slow requests, and render-blocking resources</li>
+    <li>
+      Analyze the trace for long tasks (&gt;50ms), LCP, CLS, and slow resources
+    </li>
+    <li>
+      Check the network waterfall for large assets, slow requests, and
+      render-blocking resources
+    </li>
     <li>Measure Core Web Vitals for the final score</li>
   </ol>
 
@@ -87,7 +98,9 @@
   <ol>
     <li>Start console capture to wire up the CDP listener</li>
     <li>Have the user reproduce the issue</li>
-    <li>Pull error messages — filtering by <code>level=error</code> keeps noise down</li>
+    <li>
+      Pull error messages — filtering by <code>level=error</code> keeps noise down
+    </li>
   </ol>
 
   <p>
@@ -107,7 +120,10 @@
 
   <ol>
     <li>Navigate to the page</li>
-    <li>Run Lighthouse for a high-level score (performance, accessibility, SEO, best practices)</li>
+    <li>
+      Run Lighthouse for a high-level score (performance, accessibility, SEO,
+      best practices)
+    </li>
     <li>Capture a trace for the detailed timeline</li>
     <li>Analyze the trace to pinpoint exactly what Lighthouse flagged</li>
   </ol>
@@ -126,9 +142,8 @@
 
   <ol>
     <li>
-      Run <code>pen_js_coverage</code> with the <code>navigate</code> parameter
-      set to the page URL — PEN starts coverage, navigates, collects, and stops
-      internally
+      Run <code>pen_js_coverage</code> with the <code>navigate</code> parameter set
+      to the page URL — PEN starts coverage, navigates, collects, and stops internally
     </li>
     <li>
       Run <code>pen_css_coverage</code> the same way to see which CSS rules are unused
@@ -170,9 +185,8 @@
   />
 
   <p>
-    Record a raw trace, then feed it to <code>pen_trace_insights</code> for a
-    structured breakdown. No need to leave the conversation to analyze the file.
-    You get:
+    Record a raw trace, then feed it to <code>pen_trace_insights</code> for a structured
+    breakdown. No need to leave the conversation to analyze the file. You get:
   </p>
 
   <ul>
@@ -195,8 +209,12 @@
   <ol>
     <li>Enable network capture (optionally disable cache)</li>
     <li>Interact with the page — navigate, click, scroll</li>
-    <li>View the waterfall to spot slow requests, large assets, or 4xx/5xx errors</li>
-    <li>Drill into a specific request for full headers, timing, and body details</li>
+    <li>
+      View the waterfall to spot slow requests, large assets, or 4xx/5xx errors
+    </li>
+    <li>
+      Drill into a specific request for full headers, timing, and body details
+    </li>
   </ol>
 
   <h2 id="device-simulation">Device Simulation</h2>
@@ -209,7 +227,9 @@
   />
 
   <ol>
-    <li>Set device emulation (e.g., iPhone 14 with 4G network + 4x CPU throttle)</li>
+    <li>
+      Set device emulation (e.g., iPhone 14 with 4G network + 4x CPU throttle)
+    </li>
     <li>Navigate to the page</li>
     <li>Measure Web Vitals under throttled conditions</li>
     <li>Capture a trace to see what's slow on constrained hardware</li>
@@ -238,11 +258,31 @@
     <table>
       <thead><tr><th>Producer</th><th>ID Type</th><th>Consumer</th></tr></thead>
       <tbody>
-        <tr><td><code>pen_heap_snapshot</code></td><td>snapshot ID</td><td><code>pen_heap_diff</code></td></tr>
-        <tr><td><code>pen_list_pages</code></td><td>target ID</td><td><code>pen_select_page</code></td></tr>
-        <tr><td><code>pen_network_waterfall</code></td><td>request ID</td><td><code>pen_network_request</code></td></tr>
-        <tr><td><code>pen_list_sources</code></td><td>script ID</td><td><code>pen_source_content</code>, <code>pen_search_source</code></td></tr>
-        <tr><td><code>pen_capture_trace</code></td><td>trace path</td><td><code>pen_trace_insights</code></td></tr>
+        <tr
+          ><td><code>pen_heap_snapshot</code></td><td>snapshot ID</td><td
+            ><code>pen_heap_diff</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>pen_list_pages</code></td><td>target ID</td><td
+            ><code>pen_select_page</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>pen_network_waterfall</code></td><td>request ID</td><td
+            ><code>pen_network_request</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>pen_list_sources</code></td><td>script ID</td><td
+            ><code>pen_source_content</code>, <code>pen_search_source</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>pen_capture_trace</code></td><td>trace path</td><td
+            ><code>pen_trace_insights</code></td
+          ></tr
+        >
       </tbody>
     </table>
   </div>

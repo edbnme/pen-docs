@@ -29,25 +29,28 @@
 
 {#if headings.length > 0}
   <nav class="toc hidden xl:block w-56 shrink-0">
-    <div class="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
+    <div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
       <div
-        class="text-[0.65rem] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2"
+        class="text-[0.6875rem] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3"
       >
         On this page
       </div>
-      <ul class="space-y-0.5 border-l border-gray-100 dark:border-gray-800">
+      <ul
+        class="space-y-0.5 border-l border-gray-200/80 dark:border-gray-800/60"
+      >
         {#each headings as heading (heading.id)}
           <li
             style="padding-left: {(heading.depth - 2) * 0.75 + 0.75}rem"
-            class="-ml-px border-l-2 transition-colors {activeId === heading.id
-              ? 'border-indigo-500'
+            class="-ml-px border-l-2 transition-colors duration-200 {activeId ===
+            heading.id
+              ? 'border-gray-900 dark:border-gray-100'
               : 'border-transparent'}"
           >
             <a
               href={`#${heading.id}`}
-              class="block text-[0.75rem] py-1 transition-colors {activeId ===
+              class="block text-[0.75rem] py-1 transition-colors duration-200 {activeId ===
               heading.id
-                ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                ? 'text-gray-900 dark:text-gray-100 font-medium'
                 : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}"
             >
               {heading.text}

@@ -85,7 +85,7 @@
     ></button>
 
     <div
-      class="relative w-full max-w-lg mx-4 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+      class="relative w-full max-w-xl mx-4 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl shadow-gray-900/10 dark:shadow-black/30 border border-gray-200/80 dark:border-gray-700/60 overflow-hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Search documentation"
@@ -130,24 +130,24 @@
         {:else}
           {#each results as doc, i (doc.slug)}
             <button
-              class="w-full text-left px-4 py-2.5 flex items-center gap-3 transition-colors {i ===
+              class="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors duration-150 {i ===
               selectedIndex
-                ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}"
+                ? 'bg-gray-100 dark:bg-white/[0.06] text-gray-900 dark:text-gray-100'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03]'}"
               onclick={() => navigate(doc)}
               onmouseenter={() => (selectedIndex = i)}
             >
               <div class="min-w-0 flex-1">
                 <div
                   class="text-sm font-medium {i === selectedIndex
-                    ? 'text-indigo-700 dark:text-indigo-300'
+                    ? 'text-gray-900 dark:text-gray-100'
                     : 'text-gray-900 dark:text-gray-100'}"
                 >
                   {doc.title}
                 </div>
                 <div
                   class="text-xs mt-0.5 truncate {i === selectedIndex
-                    ? 'text-indigo-500 dark:text-indigo-400'
+                    ? 'text-gray-500 dark:text-gray-400'
                     : 'text-gray-400 dark:text-gray-500'}"
                 >
                   {doc.description}
@@ -156,7 +156,7 @@
               <span
                 class="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded {i ===
                 selectedIndex
-                  ? 'text-indigo-400 bg-indigo-100 dark:bg-indigo-900'
+                  ? 'text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-800'
                   : 'text-gray-300 dark:text-gray-500 bg-gray-100 dark:bg-gray-800'}"
               >
                 {doc.section}

@@ -30,15 +30,15 @@
 
   <Mermaid
     code={`flowchart LR
-    IDE["AI Assistant<br/>(IDE / LLM)"] -->|"MCP (stdio or HTTP)"| PEN["PEN<br/>(Go binary)"]
+    IDE["AI Assistant<br>(IDE / LLM)"] -->|"MCP (stdio or HTTP)"| PEN["PEN<br>(Go binary)"]
     PEN -->|"CDP (WebSocket)"| Chrome[Chrome]`}
   />
 
   <p>
-    Your editor spawns PEN as a child process. When the LLM calls something
-    like <code>pen_heap_snapshot</code>, PEN fires the right Chrome DevTools
-    Protocol commands, streams data to disk, and sends back analysis the LLM
-    can act on.
+    Your editor spawns PEN as a child process. When the LLM calls something like <code
+      >pen_heap_snapshot</code
+    >, PEN fires the right Chrome DevTools Protocol commands, streams data to
+    disk, and sends back analysis the LLM can act on.
   </p>
 
   <h2 id="what-you-can-do">What You Can Do</h2>
@@ -55,7 +55,10 @@
       <tbody>
         <tr>
           <td><strong>Memory</strong></td>
-          <td>Heap snapshots, snapshot diffs for leak detection, allocation tracking</td>
+          <td
+            >Heap snapshots, snapshot diffs for leak detection, allocation
+            tracking</td
+          >
           <td>4 tools</td>
         </tr>
         <tr>
@@ -95,7 +98,8 @@
         </tr>
         <tr>
           <td><strong>Utility</strong></td>
-          <td>Navigation, screenshots, eval, device emulation, tab switching</td>
+          <td>Navigation, screenshots, eval, device emulation, tab switching</td
+          >
           <td>8 tools</td>
         </tr>
       </tbody>
@@ -121,8 +125,8 @@ pen init`}
   />
 
   <p>
-    <code>pen init</code> detects your browser and IDE, writes the MCP config,
-    and verifies the connection.
+    <code>pen init</code> detects your browser and IDE, writes the MCP config, and
+    verifies the connection.
   </p>
 
   <p>Or install via package managers:</p>
@@ -147,8 +151,8 @@ scoop bucket add pen https://github.com/edbnme/scoop-pen && scoop install pen  #
   </blockquote>
 
   <p>
-    PEN connects to Chrome, runs <code>pen_performance_metrics</code> via CDP,
-    and returns:
+    PEN connects to Chrome, runs <code>pen_performance_metrics</code> via CDP, and
+    returns:
   </p>
 
   <CodeBlock
@@ -163,8 +167,8 @@ scoop bucket add pen https://github.com/edbnme/scoop-pen && scoop install pen  #
   />
 
   <p>
-    The LLM spots the high heap and slow scripts, then suggests fixes. You
-    never open DevTools.
+    The LLM spots the high heap and slow scripts, then suggests fixes. You never
+    open DevTools.
   </p>
 
   <h2 id="key-design-decisions">Key Design Decisions</h2>
@@ -192,7 +196,8 @@ scoop bucket add pen https://github.com/edbnme/scoop-pen && scoop install pen  #
         <tr>
           <td>CDP</td>
           <td>Attach to existing browser</td>
-          <td>Never launches a browser — your dev browser is already running</td>
+          <td>Never launches a browser — your dev browser is already running</td
+          >
         </tr>
         <tr>
           <td>Large payloads</td>
@@ -202,7 +207,9 @@ scoop bucket add pen https://github.com/edbnme/scoop-pen && scoop install pen  #
         <tr>
           <td>Security</td>
           <td>Layered gates</td>
-          <td>Eval gating, expression blocklist, path validation, rate limits</td>
+          <td
+            >Eval gating, expression blocklist, path validation, rate limits</td
+          >
         </tr>
       </tbody>
     </table>
@@ -217,8 +224,8 @@ scoop bucket add pen https://github.com/edbnme/scoop-pen && scoop install pen  #
       target="_blank"
       rel="noopener noreferrer"><code>chrome-devtools-mcp</code></a
     >
-    — a general DevTools MCP server for navigation, DOM, screenshots, network,
-    traces, memory, and Lighthouse.
+    — a general DevTools MCP server for navigation, DOM, screenshots, network, traces,
+    memory, and Lighthouse.
   </p>
 
   <p>
@@ -240,31 +247,59 @@ scoop bucket add pen https://github.com/edbnme/scoop-pen && scoop install pen  #
       </thead>
       <tbody>
         <tr>
-          <td><a href="/docs/install" data-sveltekit-preload-data="hover">Installation</a></td>
+          <td
+            ><a href="/docs/install" data-sveltekit-preload-data="hover"
+              >Installation</a
+            ></td
+          >
           <td>Install, browser setup, IDE config, <code>pen init</code></td>
         </tr>
         <tr>
-          <td><a href="/docs/running" data-sveltekit-preload-data="hover">Running PEN</a></td>
+          <td
+            ><a href="/docs/running" data-sveltekit-preload-data="hover"
+              >Running PEN</a
+            ></td
+          >
           <td>Flags, Docker, server deploys</td>
         </tr>
         <tr>
-          <td><a href="/docs/tool-catalog" data-sveltekit-preload-data="hover">Tool Reference</a></td>
+          <td
+            ><a href="/docs/tool-catalog" data-sveltekit-preload-data="hover"
+              >Tool Reference</a
+            ></td
+          >
           <td>Every tool's params and output</td>
         </tr>
         <tr>
-          <td><a href="/docs/workflows" data-sveltekit-preload-data="hover">Workflows</a></td>
+          <td
+            ><a href="/docs/workflows" data-sveltekit-preload-data="hover"
+              >Workflows</a
+            ></td
+          >
           <td>Common tool chains and recipes</td>
         </tr>
         <tr>
-          <td><a href="/docs/troubleshooting" data-sveltekit-preload-data="hover">Troubleshooting</a></td>
+          <td
+            ><a href="/docs/troubleshooting" data-sveltekit-preload-data="hover"
+              >Troubleshooting</a
+            ></td
+          >
           <td>Common issues and fixes</td>
         </tr>
         <tr>
-          <td><a href="/docs/security" data-sveltekit-preload-data="hover">Security</a></td>
+          <td
+            ><a href="/docs/security" data-sveltekit-preload-data="hover"
+              >Security</a
+            ></td
+          >
           <td>Threat model and defenses</td>
         </tr>
         <tr>
-          <td><a href="/docs/architecture" data-sveltekit-preload-data="hover">Architecture</a></td>
+          <td
+            ><a href="/docs/architecture" data-sveltekit-preload-data="hover"
+              >Architecture</a
+            ></td
+          >
           <td>System design (for contributors)</td>
         </tr>
       </tbody>

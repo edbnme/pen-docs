@@ -24,8 +24,8 @@ pen --allow-eval --project-root /my/project`}
   />
 
   <p>
-    PEN prints <code>PEN ready</code> to stderr and waits for MCP messages on
-    stdin/stdout. Normally your IDE handles this — you don't run PEN by hand.
+    PEN prints <code>PEN ready</code> to stderr and waits for MCP messages on stdin/stdout.
+    Normally your IDE handles this — you don't run PEN by hand.
   </p>
 
   <h2 id="flags">Flags</h2>
@@ -40,18 +40,49 @@ pen --allow-eval --project-root /my/project`}
         </tr>
       </thead>
       <tbody>
-        <tr><td><code>--cdp-url</code></td><td><code>http://localhost:9222</code></td><td>CDP endpoint</td></tr>
-        <tr><td><code>--transport</code></td><td><code>stdio</code></td><td><code>stdio</code>, <code>http</code>, or <code>sse</code></td></tr>
-        <tr><td><code>--addr</code></td><td><code>localhost:6100</code></td><td>Bind address for HTTP/SSE</td></tr>
-        <tr><td><code>--allow-eval</code></td><td><code>false</code></td><td>Enable <code>pen_evaluate</code> (runs JS in browser)</td></tr>
-        <tr><td><code>--project-root</code></td><td><code>.</code></td><td>Sandbox for source file paths</td></tr>
-        <tr><td><code>--log-level</code></td><td><code>info</code></td><td><code>debug</code> / <code>info</code> / <code>warn</code> / <code>error</code></td></tr>
-        <tr><td><code>--version</code></td><td>—</td><td>Print version and exit</td></tr>
+        <tr
+          ><td><code>--cdp-url</code></td><td
+            ><code>http://localhost:9222</code></td
+          ><td>CDP endpoint</td></tr
+        >
+        <tr
+          ><td><code>--transport</code></td><td><code>stdio</code></td><td
+            ><code>stdio</code>, <code>http</code>, or <code>sse</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>--addr</code></td><td><code>localhost:6100</code></td><td
+            >Bind address for HTTP/SSE</td
+          ></tr
+        >
+        <tr
+          ><td><code>--allow-eval</code></td><td><code>false</code></td><td
+            >Enable <code>pen_evaluate</code> (runs JS in browser)</td
+          ></tr
+        >
+        <tr
+          ><td><code>--project-root</code></td><td><code>.</code></td><td
+            >Sandbox for source file paths</td
+          ></tr
+        >
+        <tr
+          ><td><code>--log-level</code></td><td><code>info</code></td><td
+            ><code>debug</code> / <code>info</code> / <code>warn</code> /
+            <code>error</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>--version</code></td><td>—</td><td
+            >Print version and exit</td
+          ></tr
+        >
       </tbody>
     </table>
   </div>
 
-  <p>Both <code>-flag</code> and <code>--flag</code> work. All flags are optional.</p>
+  <p>
+    Both <code>-flag</code> and <code>--flag</code> work. All flags are optional.
+  </p>
 
   <h2 id="http-transport">HTTP Transport</h2>
 
@@ -68,9 +99,8 @@ pen --allow-eval --project-root /my/project`}
   <h2 id="browser-setup">Browser Setup</h2>
 
   <p>
-    Close the browser <strong>all the way</strong> first — every window, every
-    background process. The debug port only works when Chrome launches fresh
-    with the flag.
+    Close the browser <strong>all the way</strong> first — every window, every background
+    process. The debug port only works when Chrome launches fresh with the flag.
   </p>
 
   <p><strong>macOS:</strong></p>
@@ -93,13 +123,15 @@ pen --allow-eval --project-root /my/project`}
   <CodeBlock lang="bash" code="google-chrome --remote-debugging-port=9222" />
 
   <p>
-    Verify: <code>http://localhost:9222/json</code> should return a JSON array
-    of open tabs.
+    Verify: <code>http://localhost:9222/json</code> should return a JSON array of
+    open tabs.
   </p>
 
   <h2 id="ide-config">IDE Config</h2>
 
-  <p>Your editor spawns PEN as a child process. Set it up once, then forget it.</p>
+  <p>
+    Your editor spawns PEN as a child process. Set it up once, then forget it.
+  </p>
 
   <p><strong>VS Code</strong> — <code>.vscode/mcp.json</code>:</p>
 
@@ -169,7 +201,9 @@ go build -o pen.exe ./cmd/pen    # Windows`}
     code="go build -ldflags &quot;-s -w -X main.version=v1.0.0&quot; -o pen ./cmd/pen"
   />
 
-  <p>Cross-compiled via GoReleaser for linux/darwin/windows on amd64 and arm64.</p>
+  <p>
+    Cross-compiled via GoReleaser for linux/darwin/windows on amd64 and arm64.
+  </p>
 
   <h2 id="docker">Docker</h2>
 
@@ -230,8 +264,8 @@ pen --cdp-url http://localhost:9222`}
   <h2 id="optional-lighthouse-cli">Optional: Lighthouse CLI</h2>
 
   <p>
-    The <code>pen_lighthouse</code> tool shells out to the Lighthouse CLI for
-    full audits. Install it separately:
+    The <code>pen_lighthouse</code> tool shells out to the Lighthouse CLI for full
+    audits. Install it separately:
   </p>
 
   <CodeBlock lang="bash" code="npm install -g lighthouse" />

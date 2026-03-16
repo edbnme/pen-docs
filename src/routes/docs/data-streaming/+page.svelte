@@ -21,7 +21,10 @@
 
   <div class="table-wrapper">
     <table>
-      <thead><tr><th>Operation</th><th>Typical Size</th><th>Worst Case</th></tr></thead>
+      <thead
+        ><tr><th>Operation</th><th>Typical Size</th><th>Worst Case</th></tr
+        ></thead
+      >
       <tbody>
         <tr><td>Heap snapshot</td><td>50–500 MB</td><td>2+ GB</td></tr>
         <tr><td>Chrome trace</td><td>5–50 MB</td><td>500+ MB</td></tr>
@@ -40,8 +43,8 @@
 
   <p>
     CDP delivers heap snapshots as a stream of
-    <code>HeapProfiler.addHeapSnapshotChunk</code> events — each one carries a
-    string chunk of JSON.
+    <code>HeapProfiler.addHeapSnapshotChunk</code> events — each one carries a string
+    chunk of JSON.
   </p>
 
   <Mermaid
@@ -52,8 +55,8 @@
     participant CDP as Chrome (CDP)
     participant MCP as MCP Client
 
-    Handler->>+Lock: Acquire("HeapProfiler")
-    Handler->>Temp: CreateSecureTempFile("heap-")
+    Handler->>Lock: Acquire(HeapProfiler)
+    Handler->>Temp: CreateSecureTempFile(heap-)
     Handler->>CDP: HeapProfiler.collectGarbage (optional)
     Handler->>CDP: HeapProfiler.takeHeapSnapshot
 
@@ -67,7 +70,7 @@
 
     Handler->>Temp: Seek to start, analyze from disk
     Handler-->>MCP: Return structured analysis
-    Handler->>-Lock: Release`}
+    Handler->>Lock: Release`}
   />
 
   <p>
@@ -89,7 +92,7 @@
     participant CDP as Chrome (CDP)
     participant Temp as Temp File (disk)
 
-    Handler->>+Lock: Acquire("Tracing")
+    Handler->>Lock: Acquire(Tracing)
     Handler->>CDP: Tracing.start (categories, ReturnAsStream)
 
     Note over Handler: Wait for capture duration
@@ -104,7 +107,7 @@
     end
 
     Handler->>Handler: Analyze trace file
-    Handler->>-Lock: Release`}
+    Handler->>Lock: Release`}
   />
 
   <h3 id="buffer-management">Buffer Management</h3>
@@ -124,9 +127,16 @@
   <ul>
     <li>Created with <code>0600</code> permissions (owner-only read/write)</li>
     <li>Directory created with <code>0700</code> permissions</li>
-    <li>Path validated via <code>security.ValidateTempPath</code> before any read/write</li>
-    <li>Cleaned up on normal exit via <code>defer cleanupTempDir(logger)</code> in <code>main.go</code></li>
-    <li>Cleaned up on context cancellation via <code>defer</code> in each handler</li>
+    <li>
+      Path validated via <code>security.ValidateTempPath</code> before any read/write
+    </li>
+    <li>
+      Cleaned up on normal exit via <code>defer cleanupTempDir(logger)</code> in
+      <code>main.go</code>
+    </li>
+    <li>
+      Cleaned up on context cancellation via <code>defer</code> in each handler
+    </li>
   </ul>
 
   <p>
