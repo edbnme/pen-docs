@@ -61,7 +61,7 @@ Tools and projects that informed PEN's design:
 
 | Resource      | URL                                                                    |
 | ------------- | ---------------------------------------------------------------------- |
-| Source code   | [github.com/nicholasgasior/pen](https://github.com/nicholasgasior/pen) |
-| Documentation | [pen-docs (this site)](https://github.com/edbnme/pen-docs)             |
-| Go module     | `github.com/nicholasgasior/pen`                                        |
-| License       | MIT                                                                    |
+| Source code   | [github.com/edbnme/pen](https://github.com/edbnme/pen)    |
+| Documentation | [pen-docs (this site)](https://github.com/edbnme/pen-docs) |
+| Go module     | `github.com/edbnme/pen`                                    |
+| License       | MIT                                                        |

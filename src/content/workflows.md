@@ -4,8 +4,12 @@ PEN tools are designed to chain. The LLM drives the composition — PEN doesn't 
 
 ## Memory Leak Investigation
 
-```
-pen_collect_garbage → pen_heap_snapshot (A) → [user action] → pen_heap_snapshot (B) → pen_heap_diff (A, B)
+```mermaid
+flowchart LR
+    A["pen_collect_garbage"] --> B["pen_heap_snapshot (A)"]
+    B --> C(["User action"])
+    C --> D["pen_heap_snapshot (B)"]
+    D --> E["pen_heap_diff (A, B)"]
 ```
 
 1. Force GC to get a clean baseline
@@ -20,8 +24,12 @@ The diff output highlights retained objects that grew between snapshots, which a
 
 ## Page Load Optimization
 
-```
-pen_navigate (goto) → pen_capture_trace → pen_trace_insights → pen_network_waterfall → pen_web_vitals
+```mermaid
+flowchart LR
+    A[pen_navigate] --> B[pen_capture_trace]
+    B --> C[pen_trace_insights]
+    C --> D[pen_network_waterfall]
+    D --> E[pen_web_vitals]
 ```
 
 1. Navigate to the target page
@@ -34,8 +42,10 @@ This gives the LLM a complete picture: trace-level timing, network bottlenecks, 
 
 ## Console Debugging
 
-```
-pen_console_enable → [user triggers the problem] → pen_console_messages (level=error)
+```mermaid
+flowchart LR
+    A[pen_console_enable] --> B(["User triggers problem"])
+    B --> C["pen_console_messages<br/>(level=error)"]
 ```
 
 1. Start console capture to wire up the CDP listener
@@ -46,8 +56,11 @@ Console messages include source URLs, line numbers, and stack traces for excepti
 
 ## Full Page Audit
 
-```
-pen_navigate (goto) → pen_lighthouse → pen_capture_trace → pen_trace_insights
+```mermaid
+flowchart LR
+    A[pen_navigate] --> B[pen_lighthouse]
+    B --> C[pen_capture_trace]
+    C --> D[pen_trace_insights]
 ```
 
 1. Navigate to the page
@@ -59,8 +72,13 @@ Lighthouse tells you _what's wrong_; trace insights tell you _why_ and _where_ i
 
 ## Bundle Audit
 
-```
-pen_js_coverage (start) → [navigate] → pen_js_coverage (stop) → pen_css_coverage (start) → [navigate] → pen_css_coverage (stop)
+```mermaid
+flowchart LR
+    A["pen_js_coverage<br/>(start)"] --> B([Navigate])
+    B --> C["pen_js_coverage<br/>(stop)"]
+    C --> D["pen_css_coverage<br/>(start)"]
+    D --> E([Navigate])
+    E --> F["pen_css_coverage<br/>(stop)"]
 ```
 
 1. Start JS coverage
@@ -72,8 +90,11 @@ This identifies dead code. The LLM can recommend code splitting or tree-shaking 
 
 ## Multi-Tab Profiling
 
-```
-pen_list_pages → pen_select_page (target) → pen_cpu_profile → pen_performance_metrics
+```mermaid
+flowchart LR
+    A[pen_list_pages] --> B[pen_select_page]
+    B --> C[pen_cpu_profile]
+    C --> D[pen_performance_metrics]
 ```
 
 1. List all browser tabs
@@ -85,8 +106,9 @@ Useful when your app spans multiple tabs or you need to compare performance acro
 
 ## Trace-Driven Analysis
 
-```
-pen_capture_trace → pen_trace_insights
+```mermaid
+flowchart LR
+    A[pen_capture_trace] --> B[pen_trace_insights]
 ```
 
 Capture a raw trace file, then hand it to `pen_trace_insights` for a structured breakdown. No need to leave the MCP conversation to analyze the trace manually. The insights include:
@@ -99,8 +121,11 @@ Capture a raw trace file, then hand it to `pen_trace_insights` for a structured 
 
 ## Network Performance
 
-```
-pen_network_enable → [interact with page] → pen_network_waterfall → pen_network_request (specific URL)
+```mermaid
+flowchart LR
+    A[pen_network_enable] --> B(["Interact with page"])
+    B --> C[pen_network_waterfall]
+    C --> D["pen_network_request<br/>(specific URL)"]
 ```
 
 1. Enable network capture (optionally disable cache)
@@ -110,8 +135,11 @@ pen_network_enable → [interact with page] → pen_network_waterfall → pen_ne
 
 ## Device Simulation
 
-```
-pen_emulate (device + throttling) → pen_navigate (goto) → pen_web_vitals → pen_capture_trace
+```mermaid
+flowchart LR
+    A["pen_emulate<br/>(device + throttling)"] --> B[pen_navigate]
+    B --> C[pen_web_vitals]
+    C --> D[pen_capture_trace]
 ```
 
 1. Set device emulation (e.g., iPhone 14 with 4G network + 4x CPU throttle)
@@ -124,6 +152,16 @@ Network presets: `3G` (563ms latency, 188KB/s down), `4G` (170ms, 500KB/s), `WiF
 ## Tool ID Flow
 
 Some tools produce IDs consumed by downstream tools:
+
+```mermaid
+flowchart LR
+    HS[pen_heap_snapshot] -->|snapshot ID| HD[pen_heap_diff]
+    LP[pen_list_pages] -->|target ID| SP[pen_select_page]
+    NW[pen_network_waterfall] -->|request ID| NR[pen_network_request]
+    LS[pen_list_sources] -->|script ID| SC[pen_source_content]
+    LS -->|script ID| SS[pen_search_source]
+    CT[pen_capture_trace] -->|trace path| TI[pen_trace_insights]
+```
 
 | Producer                | ID Type     | Consumer                                  |
 | ----------------------- | ----------- | ----------------------------------------- |

@@ -2,29 +2,25 @@
 
 ## Component Overview
 
-```
-┌─────────────────────────────────────────────────────────┐
-│ IDE / LLM Client                                        │
-│  (Cursor, VS Code, Claude Desktop, etc.)                │
-└──────────────────────┬──────────────────────────────────┘
-                       │ MCP (stdio or HTTP)
-┌──────────────────────▼──────────────────────────────────┐
-│ PEN Server (cmd/pen)                                    │
-│                                                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌───────────────┐ │
-│  │ MCP Server   │  │ Tool Handlers│  │ Security      │ │
-│  │ (server/)    │  │ (tools/)     │  │ (security/)   │ │
-│  └──────┬───────┘  └──────┬───────┘  └───────────────┘ │
-│         │                 │                             │
-│  ┌──────▼─────────────────▼───────┐  ┌───────────────┐ │
-│  │ CDP Client (cdp/)              │  │ Format        │ │
-│  └──────────────┬─────────────────┘  │ (format/)     │ │
-│                 │                    └───────────────┘ │
-└─────────────────┼───────────────────────────────────────┘
-                  │ CDP (WebSocket)
-┌─────────────────▼───────────────────────────────────────┐
-│ Chrome / Chromium (--remote-debugging-port=9222)        │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    IDE["IDE / LLM Client<br/>(Cursor, VS Code, Claude Desktop)"]
+    IDE -->|"MCP (stdio or HTTP)"| Server
+
+    subgraph PEN["PEN Server (cmd/pen)"]
+        Server["MCP Server<br/>server/"]
+        Tools["Tool Handlers<br/>tools/"]
+        Security["Security<br/>security/"]
+        Format["Format<br/>format/"]
+        CDP["CDP Client<br/>cdp/"]
+
+        Server --> Tools
+        Tools --> Security
+        Tools --> CDP
+        Tools --> Format
+    end
+
+    CDP -->|"CDP (WebSocket)"| Chrome["Chrome / Chromium<br/>(--remote-debugging-port=9222)"]
 ```
 
 ## Package Map
@@ -83,29 +79,56 @@ Go version: **1.24.2**. No other runtime dependencies beyond the standard librar
 
 From `cmd/pen/main.go`:
 
+```mermaid
+flowchart TD
+    Start([pen starts]) --> InitCheck{"args[1] = init?"}
+    InitCheck -->|Yes| Wizard["Run interactive wizard<br/>(charmbracelet/huh)"]
+    Wizard --> Done([Exit])
+    InitCheck -->|No| Flags[Parse flags]
+    Flags --> Validate["Validate CDP URL<br/>(localhost-only)"]
+    Validate --> Signal["Set up signal context<br/>(SIGINT, SIGTERM)"]
+    Signal --> Connect["Create CDP client + reconnect<br/>(3 retries, exponential backoff)"]
+    Connect --> Server[Create MCP server]
+    Server --> Register[Register all 30 tools]
+    Register --> Run["Start server on transport<br/>(stdio / SSE / HTTP)"]
+    Run --> Cleanup[Clean temp files]
+    Cleanup --> Done
+```
+
 1. Check for `"init"` subcommand → runs interactive wizard via `charmbracelet/huh`
 2. Parse flags (`--cdp-url`, `--transport`, `--addr`, `--allow-eval`, `--project-root`, `--log-level`)
 3. Validate CDP URL via `security.ValidateCDPURL` (localhost-only)
-4. Create CDP client with retry: `cdp.NewClient(url, logger)` → `client.Reconnect(ctx, 3)` (3 attempts, exponential backoff 500ms → 10s max)
-5. Create MCP server: `server.New(cdpClient, &Config{...})`
-6. Register all 30 tools: `tools.RegisterAll(server.Server(), deps)`
-7. Set up signal handling (`SIGINT`, `SIGTERM`)
+4. Set up signal context (`SIGINT`, `SIGTERM`)
+5. Create CDP client with retry: `cdp.NewClient(url, logger)` → `client.Reconnect(ctx, 3)` (3 attempts, exponential backoff 500ms → 10s max)
+6. Create MCP server: `server.New(cdpClient, &Config{...})`
+7. Register all 30 tools: `tools.RegisterAll(server.Server(), deps)`
 8. Start server with configured transport
-9. Clean up temp directory on exit via `security.CleanTempFiles()`
+9. Clean up temp directory on exit (deferred)
 
 ## Data Flow
 
 A typical tool call flows through these layers:
 
-```
-1. LLM calls pen_heap_snapshot via MCP
-2. server/ receives the CallToolRequest, dispatches to tool handler
-3. tools/memory.go checks rate limit → acquires OperationLock("HeapProfiler")
-4. cdp/client.go provides chromedp context
-5. Handler enables HeapProfiler domain, registers event listeners
-6. CDP streams heap chunks → handler writes to temp file (security/ creates it)
-7. Handler builds structured analysis, formats via format/output.go
-8. Returns CallToolResult with Markdown text → flows back to LLM
+```mermaid
+sequenceDiagram
+    participant LLM as IDE / LLM
+    participant Server as MCP Server (server/)
+    participant Handler as Tool Handler (tools/)
+    participant CDPClient as CDP Client (cdp/)
+    participant Chrome
+
+    LLM->>+Server: CallToolRequest (pen_heap_snapshot)
+    Server->>+Handler: dispatch to handler
+    Handler->>Handler: rate limit check
+    Handler->>Handler: acquire OperationLock
+    Handler->>+CDPClient: get chromedp context
+    CDPClient->>+Chrome: enable domain + register listeners
+    Chrome-->>CDPClient: stream events (heap chunks)
+    Note right of CDPClient: Chunks streamed to temp file
+    CDPClient-->>-Handler: operation complete
+    Handler->>Handler: analyze from disk + format output
+    Handler-->>-Server: CallToolResult (Markdown)
+    Server-->>-LLM: structured analysis
 ```
 
 ## Key Type Signatures

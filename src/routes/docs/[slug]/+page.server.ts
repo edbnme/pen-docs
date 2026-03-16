@@ -34,6 +34,7 @@ export const load: PageServerLoad = ({ params }) => {
     slug,
     title: doc.title,
     section: doc.section,
+    description: doc.description,
     html,
     headings,
   };

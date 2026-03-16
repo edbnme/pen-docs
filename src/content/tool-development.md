@@ -2,6 +2,14 @@
 
 Guide for adding new tools to PEN. Every tool follows the same pattern — this guide walks through it with a real example.
 
+```mermaid
+flowchart LR
+    A["1. Define Input Struct<br/>(json + jsonschema tags)"] --> B["2. Write Tool Definition<br/>(name, description, schema)"]
+    B --> C["3. Implement Handler<br/>(rate limit → lock → CDP → format)"]
+    C --> D["4. Register in category file<br/>(mcp.AddTool)"]
+    D --> E["5. Wire up in RegisterAll"]
+```
+
 ## Architecture
 
 Tools live in `internal/tools/`. Each file covers one category:

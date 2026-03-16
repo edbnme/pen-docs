@@ -6,12 +6,22 @@ How PEN formats tool output for LLM consumption.
 
 Every PEN tool returns text in `CallToolResult.Content`. The text is designed for LLM consumption first, human readability second.
 
-### Structure
+```mermaid
+flowchart LR
+    Tool[Tool Handler] --> Format["format/ package"]
+    Format --> Result["CallToolResult"]
+    Result --> Text["TextContent<br/>(Markdown tables, sections)"]
+    Result --> Image["ImageContent<br/>(base64 PNG)"]
 
-1. **Section header** — tool name and summary stats
-2. **Data tables** — Markdown tables with the most important columns
-3. **Observations** — anything anomalous, flagged inline
-4. **Recommendations** — prioritized as HIGH / MEDIUM / LOW / INFO
+    subgraph Structure["Output Structure"]
+        direction TB
+        Header["Section Header<br/>Tool name + summary stats"]
+        Tables["Data Tables<br/>Key columns only"]
+        Flags["Observations<br/>Anomalies flagged inline"]
+        Recs["Recommendations<br/>HIGH / MEDIUM / LOW / INFO"]
+        Header --> Tables --> Flags --> Recs
+    end
+```
 
 ### Constraints
 

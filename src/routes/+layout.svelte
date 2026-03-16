@@ -33,7 +33,7 @@
     </aside>
 
     <!-- Main content -->
-    <main class="flex-1 lg:ml-60 min-w-0 pt-12 lg:pt-0">
+    <main id="main-content" class="flex-1 lg:ml-60 min-w-0 pt-12 lg:pt-0">
       {@render children()}
     </main>
   </div>

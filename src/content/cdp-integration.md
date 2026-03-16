@@ -6,6 +6,28 @@ PEN uses [chromedp](https://github.com/chromedp/chromedp) (v0.13.6) to communica
 
 PEN attaches to an already-running Chrome/Chromium instance. It never launches a browser.
 
+```mermaid
+sequenceDiagram
+    participant PEN as PEN (cdp/client.go)
+    participant HTTP as Chrome HTTP Endpoint
+    participant WS as Chrome WebSocket
+
+    PEN->>HTTP: GET /json/version
+    HTTP-->>PEN: webSocketDebuggerUrl (ws://...)
+    PEN->>WS: NewRemoteAllocator(wsURL)
+    PEN->>WS: NewContext (create tab context)
+    PEN->>WS: Run (no-op to verify connection)
+    WS-->>PEN: Connection verified
+
+    alt Connection fails
+        loop Up to 3 retries
+            Note over PEN: Exponential backoff (500ms start, 10s max)
+            PEN->>HTTP: GET /json/version
+            PEN->>WS: Retry connection
+        end
+    end
+```
+
 ### Endpoint Discovery
 
 On startup, PEN hits the HTTP endpoint (typically `http://localhost:9222/json/version`) to discover the browser's WebSocket URL:
@@ -99,12 +121,15 @@ Searches targets by URL substring match. Used internally when tools accept `urlP
 | HeapProfiler | `pen_heap_snapshot`, `pen_heap_diff`, `pen_heap_track`, `pen_heap_sampling`, `pen_collect_garbage` | Yes        |
 | Profiler     | `pen_cpu_profile`, `pen_js_coverage`                                                               | Yes        |
 | Tracing      | `pen_capture_trace`                                                                                | Yes        |
+| CSS          | `pen_css_coverage`                                                                                 | Yes        |
+| Lighthouse   | `pen_lighthouse`                                                                                   | Yes        |
 | Performance  | `pen_performance_metrics`                                                                          | No         |
 | Network      | `pen_network_enable`, `pen_network_waterfall`, `pen_network_request`, `pen_network_blocking`       | No         |
-| Page         | `pen_screenshot`, `pen_network_blocking`, `pen_navigate`                                           | No         |
-| Runtime      | `pen_evaluate`, `pen_web_vitals`, `pen_emulate`, `pen_console_enable`, `pen_console_messages`      | No         |
+| Page         | `pen_screenshot`, `pen_navigate`                                                                   | No         |
+| Runtime      | `pen_evaluate`, `pen_web_vitals`, `pen_console_enable`, `pen_console_messages`                     | No         |
+| Emulation    | `pen_emulate` (CPU throttling, network conditions)                                                 | No         |
 | Debugger     | `pen_list_sources`, `pen_source_content`, `pen_search_source`                                      | No         |
-| CSS          | `pen_css_coverage`                                                                                 | No         |
+| IO           | Trace streaming (`pen_capture_trace` uses `IO.read`/`IO.close` for stream data)                    | No         |
 | DOM          | `pen_accessibility_check`                                                                          | No         |
 
 "Exclusive" means PEN uses `OperationLock` to prevent two tools from using the domain simultaneously. If a second tool tries to acquire a locked domain, it returns an immediate error explaining the conflict.

@@ -2,6 +2,22 @@
 
 How PEN handles failures across CDP, MCP, and browser interactions.
 
+```mermaid
+flowchart TD
+    ToolCall[LLM calls a tool] --> RateCheck{Rate limit OK?}
+    RateCheck -->|No| RateErr["Error: cooldown active<br/>returns wait time"]
+    RateCheck -->|Yes| LockCheck{Domain lock available?}
+    LockCheck -->|No| LockErr["Error: domain in use<br/>by another operation"]
+    LockCheck -->|Yes| CDPCheck{CDP connected?}
+    CDPCheck -->|No| CDPErr["Error: not connected<br/>suggest starting Chrome"]
+    CDPCheck -->|Yes| Execute[Execute CDP operation]
+    Execute --> Success{Success?}
+    Success -->|Yes| Format[Format result + release lock]
+    Success -->|No| TabGone{Target disappeared?}
+    TabGone -->|Yes| TabErr["Error: target invalid<br/>suggest pen_list_pages"]
+    TabGone -->|No| ChromeErr["Error: CDP error details<br/>with recovery suggestion"]
+```
+
 ## CDP Connection Errors
 
 ### Browser Not Running
@@ -81,37 +97,53 @@ The MCP protocol allows concurrent tool calls. PEN handles this with `OperationL
 
 ```go
 type OperationLock struct {
-    mu        sync.Mutex
-    operation string
+    mu    sync.Mutex
+    locks map[string]struct{} // domain → lock
 }
 ```
 
-If two tools that need exclusive CDP access are called simultaneously:
+Locks are keyed by CDP domain — multiple tools can run concurrently as long as they use different domains. If two tools that need the same exclusive CDP domain are called simultaneously:
 
-1. The first caller acquires the lock
-2. The second caller gets an immediate error: _"[operation] is currently running. Please wait for it to complete."_
+1. The first caller acquires the domain lock
+2. The second caller gets an immediate error: _"HeapProfiler is already in use by another operation. Wait for the current heap snapshot to finish, or call another tool in the meantime."_
 3. The error is returned as a `CallToolResult`, not an MCP protocol error
 
-Tools that **do** require the lock: `pen_heap_snapshot`, `pen_heap_diff`, `pen_cpu_profile`, `pen_capture_trace`, `pen_lighthouse`.
+Exclusive domains and their tools:
 
-Tools that **don't** need the lock: `pen_console_messages`, `pen_list_pages`, `pen_select_page`, `pen_screenshot`, `pen_network_waterfall`.
+| Domain                | Tools                                                                     |
+| --------------------- | ------------------------------------------------------------------------- |
+| `HeapProfiler`        | `pen_heap_snapshot`, `pen_heap_diff`                                      |
+| `HeapProfiler.tracking` | `pen_heap_track`                                                       |
+| `Profiler`            | `pen_cpu_profile`, `pen_js_coverage`                                      |
+| `Tracing`             | `pen_capture_trace`                                                       |
+| `CSS`                 | `pen_css_coverage`                                                        |
+| `Lighthouse`          | `pen_lighthouse`                                                          |
+
+Tools that **don't** need a lock: `pen_console_messages`, `pen_list_pages`, `pen_select_page`, `pen_screenshot`, `pen_network_waterfall`, `pen_performance_metrics`, `pen_web_vitals`, `pen_accessibility_check`, `pen_status`.
 
 ## Rate Limiting
 
-PEN applies per-tool rate limiting to prevent abuse:
+PEN applies per-tool cooldown-based rate limiting:
 
 ```go
 type RateLimiter struct {
-    mu       sync.Mutex
-    counters map[string]*counter
+    mu        sync.Mutex
+    lastCalls map[string]time.Time
+    cooldowns map[string]time.Duration
 }
 ```
 
-- Default: **30 calls per minute** per tool
-- When exceeded: returns an error with the wait time
-- Resets on a rolling window
+Each rate-limited tool has a minimum cooldown period between invocations:
 
-Rate limits protect against runaway LLM loops (e.g., calling `pen_screenshot` in a tight loop).
+| Tool                  | Cooldown |
+| --------------------- | -------- |
+| `pen_heap_snapshot`   | 10s      |
+| `pen_capture_trace`   | 5s       |
+| `pen_collect_garbage` | 5s       |
+
+When a tool is called within its cooldown window, `Check` returns an error with the remaining wait time (e.g., _"pen_heap_snapshot has a 10s cooldown. Try again in 6s"_). All other tools have no cooldown.
+
+Rate limits protect against resource exhaustion from runaway LLM loops.
 
 ## Input Validation
 
@@ -168,8 +200,8 @@ If the current page requires authentication:
 `pen_console_messages` stores messages in memory:
 
 - Messages accumulate from page load onward
-- A `last` parameter limits how many are returned (default: 50)
-- Clearing requires `pen_clear_console`
+- A `last` parameter limits how many are returned (max 200)
+- Clearing: use `pen_console_messages` with `clear=true` to reset the buffer
 - Very noisy pages (thousands of messages) may use significant memory
 
 ## Trace Collection Edge Cases

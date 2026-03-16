@@ -6,8 +6,10 @@ Single Go binary. No Node.js. No browser launch. Attach to your dev browser and 
 
 ## How It Works
 
-```
-AI Assistant ◄── MCP (stdio / HTTP) ──► PEN (Go) ── CDP (WebSocket) ──► Chrome
+```mermaid
+flowchart LR
+    IDE["AI Assistant<br/>(IDE / LLM)"] -->|"MCP (stdio or HTTP)"| PEN["PEN<br/>(Go binary)"]
+    PEN -->|"CDP (WebSocket)"| Chrome[Chrome]
 ```
 
 Your IDE (VS Code, Cursor, Claude Desktop) spawns PEN as a child process. When an LLM calls a tool like `pen_heap_snapshot`, PEN translates it to Chrome DevTools Protocol commands, streams results to disk, and returns structured analysis the LLM can interpret.

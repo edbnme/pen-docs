@@ -83,6 +83,16 @@ The return values:
 
 PEN supports three MCP transports:
 
+```mermaid
+flowchart TD
+    Start["pen.Run(ctx)"] --> Transport{--transport flag}
+    Transport -->|"stdio (default)"| Stdio["Read JSON-RPC from stdin<br/>Write responses to stdout<br/>Logs to stderr"]
+    Transport -->|sse| HTTP["NewStreamableHTTPHandler<br/>Mount at /mcp"]
+    Transport -->|http| HTTP
+    HTTP --> Bind["Bind to --addr<br/>(default: localhost:6100)"]
+    Bind --> Serve[Serve with session management]
+```
+
 | Transport | Flag                          | Use Case                            |
 | --------- | ----------------------------- | ----------------------------------- |
 | stdio     | `--transport stdio` (default) | IDE spawns PEN as child process     |

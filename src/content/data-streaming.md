@@ -17,17 +17,31 @@ Holding these in memory would crash PEN or exhaust the host. PEN streams them to
 
 CDP delivers heap snapshots as a series of `HeapProfiler.addHeapSnapshotChunk` events, each carrying a string chunk of the JSON data.
 
-**Flow:**
+```mermaid
+sequenceDiagram
+    participant Handler as Tool Handler
+    participant Lock as OperationLock
+    participant Temp as Temp File (disk)
+    participant CDP as Chrome (CDP)
+    participant MCP as MCP Client
 
-1. Handler acquires `OperationLock("HeapProfiler")`
-2. Creates a temp file via `security.CreateSecureTempFile("heap-")`
-3. Optionally triggers GC (`HeapProfiler.collectGarbage`)
-4. Registers listener for `addHeapSnapshotChunk` events
-5. Calls `HeapProfiler.takeHeapSnapshot` with `reportProgress: true`
-6. Each chunk event → `file.Write(chunk)` — constant memory
-7. `reportHeapSnapshotProgress` events → MCP progress notifications
-8. On completion, seeks back to start of file for analysis
-9. Releases lock, returns structured analysis
+    Handler->>+Lock: Acquire("HeapProfiler")
+    Handler->>Temp: CreateSecureTempFile("heap-")
+    Handler->>CDP: HeapProfiler.collectGarbage (optional)
+    Handler->>CDP: HeapProfiler.takeHeapSnapshot
+
+    loop Each chunk (constant memory)
+        CDP-->>Handler: addHeapSnapshotChunk
+        Handler->>Temp: Write chunk to disk
+    end
+
+    CDP-->>Handler: reportHeapSnapshotProgress
+    Handler--)MCP: Progress notification
+
+    Handler->>Temp: Seek to start, analyze from disk
+    Handler-->>MCP: Return structured analysis
+    Handler->>-Lock: Release
+```
 
 Memory usage stays constant regardless of heap size because chunks are written directly to disk.
 
@@ -35,15 +49,30 @@ Memory usage stays constant regardless of heap size because chunks are written d
 
 Chrome traces use `Tracing.start` with `transferMode: "ReturnAsStream"` and optional gzip compression.
 
-**Flow:**
+```mermaid
+sequenceDiagram
+    participant Handler as Tool Handler
+    participant Lock as OperationLock
+    participant CDP as Chrome (CDP)
+    participant Temp as Temp File (disk)
 
-1. Handler acquires `OperationLock("Tracing")`
-2. Calls `Tracing.start` with selected categories
-3. Waits for duration, then calls `Tracing.end`
-4. `tracingComplete` event returns an `IO.StreamHandle`
-5. Handler reads chunks via `IO.read(handle)` in a loop until `eof`
-6. Each chunk → written to temp file
-7. Releases lock, returns trace analysis
+    Handler->>+Lock: Acquire("Tracing")
+    Handler->>CDP: Tracing.start (categories, ReturnAsStream)
+
+    Note over Handler: Wait for capture duration
+
+    Handler->>CDP: Tracing.end
+    CDP-->>Handler: tracingComplete (IO.StreamHandle)
+
+    loop Until eof
+        Handler->>CDP: IO.read(handle)
+        CDP-->>Handler: chunk data
+        Handler->>Temp: Write chunk
+    end
+
+    Handler->>Handler: Analyze trace file
+    Handler->>-Lock: Release
+```
 
 ### Buffer Management
 
@@ -73,19 +102,22 @@ This only fires if the MCP client provided a progress token in the request. Safe
 
 ## Data Flow Diagram
 
-```
-CDP Event Stream                 PEN                              LLM
-     │                            │                                │
-     │  addHeapSnapshotChunk(1)   │                                │
-     ├───────────────────────────→│ write to temp file             │
-     │  addHeapSnapshotChunk(2)   │                                │
-     ├───────────────────────────→│ write to temp file             │
-     │  ...                       │ send progress notification ───→│
-     │  addHeapSnapshotChunk(N)   │                                │
-     ├───────────────────────────→│ write to temp file             │
-     │  reportHeapSnapshotProgress│                                │
-     ├───────────────────────────→│ analyze from disk              │
-     │                            │ format structured output       │
-     │                            │ CallToolResult ───────────────→│
-     │                            │ delete temp file               │
+```mermaid
+sequenceDiagram
+    participant CDP as CDP Event Stream
+    participant PEN
+    participant LLM
+
+    CDP->>PEN: addHeapSnapshotChunk (1)
+    Note right of PEN: Write to temp file
+    CDP->>PEN: addHeapSnapshotChunk (2)
+    Note right of PEN: Write to temp file
+    CDP->>PEN: addHeapSnapshotChunk (...N)
+    Note right of PEN: Write to temp file
+    PEN--)LLM: Progress notification
+    CDP->>PEN: reportHeapSnapshotProgress
+    Note right of PEN: Analyze from disk
+    Note right of PEN: Format structured output
+    PEN->>LLM: CallToolResult
+    Note right of PEN: Delete temp file
 ```
