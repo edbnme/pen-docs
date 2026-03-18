@@ -55,13 +55,17 @@
   <p>
     CDP: <code>HeapProfiler.takeHeapSnapshot</code>,
     <code>addHeapSnapshotChunk</code>
-    events. Exclusive lock. Rate limit: <strong>10s cooldown</strong>.
+    events. Exclusive lock. Rate limit: <strong>10s cooldown</strong>. Hard cap:
+    <strong>2 GB</strong>
+    — snapshots exceeding this limit are aborted with a suggestion to use
+    <code>pen_heap_sampling</code>.
   </p>
 
   <h3 id="pen_heap_diff"><code>pen_heap_diff</code></h3>
   <p>
-    Compare two snapshots to spot memory growth. Shows new objects, grown
-    objects, and total delta.
+    Compare two snapshots to spot memory growth. Shows size delta, percentage
+    change, and a qualitative assessment (minimal / moderate / significant /
+    large growth — likely a memory leak).
   </p>
   <div class="table-wrapper">
     <table>
@@ -206,7 +210,8 @@
     <code>blink.user_timing</code>, <code>loading</code>,
     <code>latencyInfo</code>,
     <code>disabled-by-default-devtools.timeline</code>. Exclusive lock. Rate
-    limit: <strong>5s cooldown</strong>.
+    limit: <strong>5s cooldown</strong>. Hard cap: <strong>500 MB</strong> — traces
+    exceeding this limit are aborted.
   </p>
 
   <h3 id="pen_trace_insights"><code>pen_trace_insights</code></h3>
@@ -288,6 +293,18 @@
         <tr
           ><td><code>filter</code></td><td>string</td><td>—</td><td
             >Filter by MIME type prefix</td
+          ></tr
+        >
+        <tr
+          ><td><code>statusFilter</code></td><td>string</td><td>—</td><td
+            >Filter by status: <code>4xx</code>, <code>5xx</code>,
+            <code>error</code> (all failures), or exact code like
+            <code>404</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>urlFilter</code></td><td>string</td><td>—</td><td
+            >Filter by URL substring (case-insensitive)</td
           ></tr
         >
         <tr
@@ -599,6 +616,11 @@
           ></tr
         >
         <tr
+          ><td><code>textFilter</code></td><td>string</td><td>—</td><td
+            >Filter by case-insensitive substring match on message text</td
+          ></tr
+        >
+        <tr
           ><td><code>last</code></td><td>int</td><td>all</td><td
             >Return only the N most recent messages (max 200)</td
           ></tr
@@ -664,7 +686,9 @@
   <h3 id="pen_status"><code>pen_status</code></h3>
   <p>
     Show PEN server status. No parameters. Returns connection state, version,
-    active target, and config.
+    active target, config, runtime memory stats, and currently
+    <strong>active operations</strong> (which tools hold domain locks and for how
+    long).
   </p>
 
   <h3 id="pen_list_pages"><code>pen_list_pages</code></h3>
@@ -792,15 +816,18 @@
         >
         <tr
           ><td><code>networkThrottling</code></td><td>string</td><td
-            ><code>3G</code>, <code>4G</code>, or <code>WiFi</code></td
+            ><code>slow-3g</code>, <code>3G</code>, <code>4G</code>,
+            <code>WiFi</code>, or <code>offline</code></td
           ></tr
         >
       </tbody>
     </table>
   </div>
   <p>
-    Network presets: 3G (563ms latency, 188KB/s), 4G (170ms, 500KB/s), WiFi
-    (2ms, 3.75MB/s).
+    Network presets: slow-3G (2000ms latency, 50KB/s), 3G (563ms latency,
+    188KB/s), 4G (170ms, 500KB/s), WiFi (2ms, 3.75MB/s), offline (no
+    connectivity). Settings persist until browser restart — affects all
+    subsequent measurements.
   </p>
 
   <h3 id="pen_evaluate"><code>pen_evaluate</code></h3>

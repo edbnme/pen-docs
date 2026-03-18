@@ -61,6 +61,11 @@ pen --allow-eval --project-root /my/project`}
           ></tr
         >
         <tr
+          ><td><code>--auto-launch</code></td><td><code>false</code></td><td
+            >Auto-launch a debug browser if CDP not found</td
+          ></tr
+        >
+        <tr
           ><td><code>--project-root</code></td><td><code>.</code></td><td
             >Sandbox for source file paths</td
           ></tr
@@ -98,33 +103,62 @@ pen --allow-eval --project-root /my/project`}
 
   <h2 id="browser-setup">Browser Setup</h2>
 
+  <h3 id="recommended-auto-launch">Recommended: Auto-Launch</h3>
+
   <p>
-    Close the browser <strong>all the way</strong> first — every window, every background
-    process. The debug port only works when Chrome launches fresh with the flag.
+    Use <code>--auto-launch</code> and PEN handles everything:
+  </p>
+
+  <CodeBlock lang="bash" code="pen --auto-launch" />
+
+  <p>
+    This detects an installed Chromium browser (Chrome, Edge, or Brave),
+    launches it with a <strong>separate debug profile</strong>, and connects via
+    CDP. Your existing browser (tabs, bookmarks, sessions) is completely
+    untouched.
+  </p>
+
+  <h3 id="manual-browser-launch">Manual: Launch with Separate Profile</h3>
+
+  <p>
+    If you prefer to launch the browser yourself, use <code
+      >--user-data-dir</code
+    > to avoid conflicts with your existing browser:
   </p>
 
   <p><strong>macOS:</strong></p>
 
   <CodeBlock
     lang="bash"
-    code="open -a &quot;Google Chrome&quot; --args --remote-debugging-port=9222"
+    code="open -a "Google Chrome" --args --remote-debugging-port=9222 --user-data-dir=/tmp/pen-debug-profile --no-first-run"
   />
 
   <p><strong>Windows (PowerShell):</strong></p>
 
   <CodeBlock
     lang="powershell"
-    code={`& "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9222       # Chrome
-& "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe" --remote-debugging-port=9222      # Edge`}
+    code={`& "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9222 --user-data-dir="$env:TEMP\\pen-debug-profile" --no-first-run`}
   />
 
   <p><strong>Linux:</strong></p>
 
-  <CodeBlock lang="bash" code="google-chrome --remote-debugging-port=9222" />
+  <CodeBlock
+    lang="bash"
+    code="google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/pen-debug-profile --no-first-run &"
+  />
 
   <p>
     Verify: <code>http://localhost:9222/json</code> should return a JSON array of
     open tabs.
+  </p>
+
+  <p>
+    <strong>Why <code>--user-data-dir</code>?</strong> Chrome’s
+    <code>--remote-debugging-port</code>
+    flag is silently ignored when Chrome is already running. Using
+    <code>--user-data-dir</code>
+    forces a separate instance that works alongside your existing browser — no need
+    to close anything.
   </p>
 
   <h2 id="ide-config">IDE Config</h2>
@@ -141,7 +175,7 @@ pen --allow-eval --project-root /my/project`}
   "servers": {
     "pen": {
       "command": "pen",
-      "args": ["--project-root", "\${workspaceFolder}"]
+      "args": ["--auto-launch", "--project-root", "\${workspaceFolder}"]
     }
   }
 }`}
@@ -158,7 +192,7 @@ pen --allow-eval --project-root /my/project`}
   "mcpServers": {
     "pen": {
       "command": "pen",
-      "args": ["--project-root", "\${workspaceFolder}"]
+      "args": ["--auto-launch", "--project-root", "\${workspaceFolder}"]
     }
   }
 }`}
@@ -177,7 +211,7 @@ pen --allow-eval --project-root /my/project`}
   "mcpServers": {
     "pen": {
       "command": "pen",
-      "args": ["--project-root", "/absolute/path/to/project"]
+      "args": ["--auto-launch", "--project-root", "/absolute/path/to/project"]
     }
   }
 }`}

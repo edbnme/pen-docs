@@ -56,6 +56,13 @@ Start Chrome with: chrome --remote-debugging-port=9222`}
 
   <ol>
     <li>The WebSocket drops</li>
+    <li>chromedp cancels the browser context</li>
+    <li>
+      PEN’s disconnect detector (a goroutine monitoring the context) catches
+      this immediately, marks the connection as lost, and logs: <em
+        >"CDP connection lost — browser may have crashed or been closed"</em
+      >
+    </li>
     <li>CDP calls come back with <code>context.Canceled</code></li>
     <li>PEN wraps the error and sends it to the LLM</li>
     <li>PEN itself stays up — it doesn't crash</li>
@@ -165,7 +172,8 @@ Start Chrome with: chrome --remote-debugging-port=9222`}
     lang="go"
     code={`type OperationLock struct {
     mu    sync.Mutex
-    locks map[string]struct{} // domain → lock
+    locks map[string]string    // domain → holder description
+    since map[string]time.Time // domain → lock acquisition time
 }`}
   />
 
@@ -177,9 +185,10 @@ Start Chrome with: chrome --remote-debugging-port=9222`}
   <ol>
     <li>The first caller acquires the domain lock</li>
     <li>
-      The second caller gets an immediate error: <em
-        >"HeapProfiler is already in use by another operation. Wait for the
-        current heap snapshot to finish, or call another tool in the meantime."</em
+      The second caller gets an immediate error showing who holds the lock and
+      for how long: <em
+        >"HeapProfiler is already in use by HeapProfiler (held for 12s). Try
+        pen_heap_sampling for a lower-overhead alternative."</em
       >
     </li>
     <li>
@@ -187,6 +196,11 @@ Start Chrome with: chrome --remote-debugging-port=9222`}
       protocol error
     </li>
   </ol>
+
+  <p>
+    Each lock error includes a suggestion for an alternative tool that doesn’t
+    conflict. Use <code>pen_status</code> to see all currently active operations.
+  </p>
 
   <p>Exclusive domains and their tools:</p>
 
@@ -381,8 +395,11 @@ Start Chrome with: chrome --remote-debugging-port=9222`}
   </ul>
 
   <p>
-    <code>pen_capture_trace</code> takes a <code>duration</code> param (default: 5s).
-    Keep it short for sane file sizes.
+    <code>pen_capture_trace</code> enforces a <strong>500 MB</strong> hard cap.
+    If the streaming data exceeds this during capture, the stream is closed and
+    an error is returned. The <code>duration</code> param (default: 5s) keeps
+    sizes sane. For analysis, <code>pen_trace_insights</code> caps at
+    <strong>100 MB</strong> to avoid blowing up during JSON parsing.
   </p>
 
   <h3>Temp File Cleanup</h3>
@@ -402,10 +419,13 @@ Start Chrome with: chrome --remote-debugging-port=9222`}
   <ol>
     <li>
       <strong>Never crash</strong>: PEN stays up. Errors go back as tool
-      results.
+      results. On SIGINT/SIGTERM, PEN allows a 5-second grace period for
+      in-progress operations before forcing exit.
     </li>
     <li>
       <strong>Be specific</strong>: Say what happened and what to do about it.
+      Error messages include actionable suggestions (alternative tools,
+      troubleshooting steps).
     </li>
     <li>
       <strong>Degrade gracefully</strong>: Partial results beat no results
@@ -413,7 +433,9 @@ Start Chrome with: chrome --remote-debugging-port=9222`}
     </li>
     <li>
       <strong>Clean up after yourself</strong>: Every operation resets its own
-      state, even on failure (<code>defer</code> in Go).
+      state, even on failure (<code>defer</code> in Go). Profiler cleanup on
+      cancellation uses <code>context.Background()</code> to guarantee commands reach
+      Chrome even after the request context is cancelled.
     </li>
     <li>
       <strong>Let the LLM decide</strong>: PEN reports the problem. The LLM

@@ -96,10 +96,12 @@ pen --cdp-url http://localhost:9222`}
   </p>
 
   <p>
-    <strong>What PEN does:</strong> Cleans up partial temp files via
-    <code>defer</code>, releases domain locks, returns <code>isError</code>
+    <strong>What PEN does:</strong> Detects the disconnection automatically
+    (monitors the browser context for cancellation), marks the connection as
+    lost, cleans up partial temp files via
+    <code>defer</code>, releases domain locks, and returns <code>isError</code>
     explaining what happened. On the next call, PEN tries to reconnect (up to 3 retries,
-    exponential backoff from 500ms to 10s).
+    exponential backoff from 1s to 10s).
   </p>
 
   <h2 id="ide-issues">IDE Issues</h2>
@@ -157,7 +159,7 @@ pen --cdp-url http://localhost:9222`}
 
   <p>
     <strong>Symptom:</strong>
-    <code>HeapProfiler is already in use by another operation</code>
+    <code>HeapProfiler is already in use by HeapProfiler (held for 12s)</code>
   </p>
 
   <p>
@@ -167,8 +169,11 @@ pen --cdp-url http://localhost:9222`}
   </p>
 
   <p>
-    <strong>Fix:</strong> Let the first operation finish. PEN uses domain-level locks
-    to keep results clean — this is by design.
+    <strong>Fix:</strong> Let the first operation finish. The error message
+    tells you which tool holds the lock and how long it’s been running. PEN also
+    suggests alternative tools you can use in the meantime (e.g.,
+    <code>pen_performance_metrics</code> instead of
+    <code>pen_cpu_profile</code>). Use <code>pen_status</code> to see all active operations.
   </p>
 
   <h3 id="lighthouse-not-found">Lighthouse not found</h3>
@@ -214,9 +219,11 @@ pen --cdp-url http://localhost:9222`}
   </p>
 
   <p>
-    <strong>What PEN does:</strong> Keeps streaming to disk (constant memory — the
-    snapshot never sits in RAM). Limits analysis depth to stay fast. The raw data
-    is still complete.
+    <strong>What PEN does:</strong> Keeps streaming to disk (constant memory —
+    the snapshot never sits in RAM). Limits analysis depth to stay fast. The raw
+    data is still complete. If the snapshot exceeds <strong>2 GB</strong>, PEN
+    aborts with an error suggesting <code>pen_heap_sampling</code> as a lower-overhead
+    alternative.
   </p>
 
   <h3 id="trace-buffer-overflow">Trace buffer overflow</h3>
@@ -257,8 +264,11 @@ pen --cdp-url http://localhost:9222`}
   </p>
 
   <p>
-    <strong>Fix:</strong> <code>pen_trace_insights</code> caps at 100 MB to avoid
-    blowing up during JSON parsing. Record shorter traces or use fewer categories.
+    <strong>Fix:</strong> <code>pen_trace_insights</code> caps at 100 MB to
+    avoid blowing up during JSON parsing. The trace capture itself (<code
+      >pen_capture_trace</code
+    >) has a <strong>500 MB</strong> hard cap — if the trace data exceeds this during
+    streaming, capture is aborted. Record shorter traces or use fewer categories.
   </p>
 
   <h2 id="page-and-navigation-issues">Page and Navigation Issues</h2>

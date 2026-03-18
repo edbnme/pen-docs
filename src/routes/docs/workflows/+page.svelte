@@ -46,8 +46,10 @@
 
   <p>
     The diff highlights retained objects that grew between the two snapshots —
-    those are your leak suspects. From there, the LLM can reason about the
-    object types and suggest what's holding the reference.
+    those are your leak suspects. PEN also includes a percentage change and a
+    qualitative assessment (e.g. "minor growth", "significant growth", "critical
+    growth") to help the LLM quickly gauge severity. From there, the LLM can
+    reason about the object types and suggest what’s holding the reference.
   </p>
 
   <blockquote>
@@ -99,7 +101,9 @@
     <li>Start console capture to wire up the CDP listener</li>
     <li>Have the user reproduce the issue</li>
     <li>
-      Pull error messages — filtering by <code>level=error</code> keeps noise down
+      Pull error messages — filtering by <code>level=error</code> keeps noise
+      down. You can also use <code>textFilter</code> to search for specific strings
+      (case-insensitive substring match) across all message text.
     </li>
   </ol>
 
@@ -210,7 +214,10 @@
     <li>Enable network capture (optionally disable cache)</li>
     <li>Interact with the page — navigate, click, scroll</li>
     <li>
-      View the waterfall to spot slow requests, large assets, or 4xx/5xx errors
+      View the waterfall to spot slow requests, large assets, or 4xx/5xx errors.
+      Use <code>statusFilter</code> (<code>4xx</code>,
+      <code>5xx</code>, <code>error</code>, or an exact status code) and
+      <code>urlFilter</code> (case-insensitive substring) to narrow results.
     </li>
     <li>
       Drill into a specific request for full headers, timing, and body details
@@ -237,7 +244,10 @@
 
   <p>
     Network presets: <code>3G</code> (563ms latency, 188KB/s down),
-    <code>4G</code> (170ms, 500KB/s), <code>WiFi</code> (2ms, 3.75MB/s).
+    <code>slow-3g</code> (2000ms, 50KB/s), <code>4G</code> (170ms, 500KB/s),
+    <code>WiFi</code> (2ms, 3.75MB/s), <code>offline</code> (all connectivity
+    disabled). You can also set <code>offline: true</code> independently of any preset
+    to simulate airplane mode.
   </p>
 
   <h2 id="tool-id-flow">Tool ID Flow</h2>

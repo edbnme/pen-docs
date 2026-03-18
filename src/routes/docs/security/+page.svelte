@@ -145,8 +145,9 @@
 
   <p>
     PEN only connects to localhost (<code>localhost</code>,
-    <code>127.0.0.1</code>, <code>::1</code>). Anything else is rejected before
-    the MCP server even starts.
+    <code>127.0.0.1</code>, <code>::1</code>, <code>0.0.0.0</code>, and
+    IPv4-mapped IPv6 addresses like <code>::ffff:127.0.0.1</code>). Anything
+    else is rejected before the MCP server even starts.
   </p>
 
   <p>For remote browsers, use SSH tunneling:</p>
@@ -219,7 +220,28 @@ pen --cdp-url http://localhost:9222`}
     </li>
   </ul>
 
-  <h2 id="gate-8-http-transport">Gate 8: HTTP Transport</h2>
+  <h2 id="gate-8-size-caps">Gate 8: Size Caps</h2>
+
+  <p>Hard limits prevent runaway captures from exhausting host resources:</p>
+
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Operation</th><th>Hard Cap</th></tr></thead>
+      <tbody>
+        <tr><td>Heap snapshot</td><td>2 GB</td></tr>
+        <tr><td>Chrome trace</td><td>500 MB</td></tr>
+        <tr><td>Screenshot</td><td>5 MB</td></tr>
+        <tr><td>Eval output</td><td>50 KB</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    When a cap is hit, PEN aborts the operation, cleans up the temp file, and
+    returns a clear error explaining the limit.
+  </p>
+
+  <h2 id="gate-9-http-transport">Gate 9: HTTP Transport</h2>
 
   <p>When using HTTP mode:</p>
 
@@ -322,8 +344,22 @@ pen_heap_snapshot → blocked (cooldown: 10s)`}
         <tr><td>Temp files: 0600 perms, isolated dir</td><td>&#10003;</td></tr>
         <tr><td>Temp files cleaned on exit</td><td>&#10003;</td></tr>
         <tr><td>Rate limiting on heavy operations</td><td>&#10003;</td></tr>
+        <tr
+          ><td>Size caps on heavy captures (2GB heap, 500MB trace)</td><td
+            >&#10003;</td
+          ></tr
+        >
         <tr><td>HTTP binds to localhost by default</td><td>&#10003;</td></tr>
-        <tr><td>Graceful shutdown on SIGINT/SIGTERM</td><td>&#10003;</td></tr>
+        <tr
+          ><td>Graceful shutdown with 5s timeout + forced exit</td><td
+            >&#10003;</td
+          ></tr
+        >
+        <tr
+          ><td>CDP disconnect detection (automatic reconnect awareness)</td><td
+            >&#10003;</td
+          ></tr
+        >
       </tbody>
     </table>
   </div>

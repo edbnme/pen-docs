@@ -26,8 +26,9 @@
         ></thead
       >
       <tbody>
-        <tr><td>Heap snapshot</td><td>50–500 MB</td><td>2+ GB</td></tr>
-        <tr><td>Chrome trace</td><td>5–50 MB</td><td>500+ MB</td></tr>
+        <tr><td>Heap snapshot</td><td>50–500 MB</td><td>2 GB (hard cap)</td></tr
+        >
+        <tr><td>Chrome trace</td><td>5–50 MB</td><td>500 MB (hard cap)</td></tr>
         <tr><td>CPU profile</td><td>100 KB–5 MB</td><td>20 MB</td></tr>
         <tr><td>Coverage data</td><td>10–500 KB</td><td>5 MB</td></tr>
       </tbody>
@@ -75,7 +76,16 @@
 
   <p>
     Memory stays flat no matter how big the heap gets — chunks go straight to
-    disk.
+    disk. A <strong>2 GB hard cap</strong> protects the host: if the snapshot exceeds
+    this limit, PEN aborts the capture, deletes the temp file, and returns a clear
+    error explaining the limit.
+  </p>
+
+  <p>
+    The CDP event listener for <code>addHeapSnapshotChunk</code> is registered on
+    a cancelable child context. When the handler returns, the child context is cancelled
+    and the listener is automatically removed — preventing listener leaks across repeated
+    calls.
   </p>
 
   <h2 id="trace-streaming">Trace Streaming</h2>
@@ -120,6 +130,14 @@
     output.
   </p>
 
+  <p>
+    A <strong>500 MB hard cap</strong> is enforced during trace streaming. If the
+    accumulated data exceeds this limit, PEN stops reading, deletes the temp file,
+    and returns a size-exceeded error. The trace completion listener uses the same
+    cancelable child context pattern as heap snapshots, ensuring it is cleaned up
+    after each call.
+  </p>
+
   <h2 id="temp-files">Temp Files</h2>
 
   <p>All temp files live under <code>os.TempDir()/pen/</code>:</p>
@@ -158,8 +176,12 @@
   />
 
   <p>
-    Fires only if the client sent a progress token in the request. Safe to call
-    every time — a missing token or nil session is a no-op.
+    Fires only if the client sent a progress token in the request. When no
+    progress token is available (or the session is nil), PEN falls back to
+    logging the progress via <code>slog.Debug</code> — so streaming activity is
+    always observable, even in stateless mode or when the client doesn't support
+    progress notifications. The percentage calculation is guarded against
+    division by zero when <code>total</code> is 0.
   </p>
 
   <h2 id="data-flow-diagram">Data Flow Diagram</h2>
