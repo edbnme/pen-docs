@@ -14,18 +14,10 @@
 >
   <h1>Running PEN</h1>
 
-  <h2 id="local-usage">Local Usage</h2>
-
-  <CodeBlock
-    lang="bash"
-    code={`pen                                          # defaults: stdio, localhost:9222
-pen --cdp-url http://localhost:9222 --log-level debug
-pen --allow-eval --project-root /my/project`}
-  />
-
   <p>
-    PEN prints <code>PEN ready</code> to stderr and waits for MCP messages on stdin/stdout.
-    Normally your IDE handles this — you don't run PEN by hand.
+    Your IDE spawns PEN automatically via the MCP config that
+    <code>pen init</code> wrote. You don't run PEN by hand unless you're using
+    HTTP transport or debugging.
   </p>
 
   <h2 id="flags">Flags</h2>
@@ -61,7 +53,7 @@ pen --allow-eval --project-root /my/project`}
           ></tr
         >
         <tr
-          ><td><code>--auto-launch</code></td><td><code>false</code></td><td
+          ><td><code>--auto-launch</code></td><td><code>true</code></td><td
             >Auto-launch a debug browser if CDP not found</td
           ></tr
         >
@@ -77,7 +69,7 @@ pen --allow-eval --project-root /my/project`}
           ></tr
         >
         <tr
-          ><td><code>--version</code></td><td>—</td><td
+          ><td><code>--version</code></td><td></td><td
             >Print version and exit</td
           ></tr
         >
@@ -85,86 +77,10 @@ pen --allow-eval --project-root /my/project`}
     </table>
   </div>
 
-  <p>
-    Both <code>-flag</code> and <code>--flag</code> work. All flags are optional.
-  </p>
-
-  <h2 id="http-transport">HTTP Transport</h2>
-
-  <p>For network-accessible use instead of stdio:</p>
-
-  <CodeBlock lang="bash" code="pen --transport http --addr localhost:6100" />
-
-  <p>
-    Serves MCP at <code>http://localhost:6100/mcp</code>. The
-    <code>sse</code> transport works identically — both use
-    <code>mcp.NewStreamableHTTPHandler</code> under the hood.
-  </p>
-
-  <h2 id="browser-setup">Browser Setup</h2>
-
-  <h3 id="recommended-auto-launch">Recommended: Auto-Launch</h3>
-
-  <p>
-    Use <code>--auto-launch</code> and PEN handles everything:
-  </p>
-
-  <CodeBlock lang="bash" code="pen --auto-launch" />
-
-  <p>
-    This detects an installed Chromium browser (Chrome, Edge, or Brave),
-    launches it with a <strong>separate debug profile</strong>, and connects via
-    CDP. Your existing browser (tabs, bookmarks, sessions) is completely
-    untouched.
-  </p>
-
-  <h3 id="manual-browser-launch">Manual: Launch with Separate Profile</h3>
-
-  <p>
-    If you prefer to launch the browser yourself, use <code
-      >--user-data-dir</code
-    > to avoid conflicts with your existing browser:
-  </p>
-
-  <p><strong>macOS:</strong></p>
-
-  <CodeBlock
-    lang="bash"
-    code="open -a "Google Chrome" --args --remote-debugging-port=9222 --user-data-dir=/tmp/pen-debug-profile --no-first-run"
-  />
-
-  <p><strong>Windows (PowerShell):</strong></p>
-
-  <CodeBlock
-    lang="powershell"
-    code={`& "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9222 --user-data-dir="$env:TEMP\\pen-debug-profile" --no-first-run`}
-  />
-
-  <p><strong>Linux:</strong></p>
-
-  <CodeBlock
-    lang="bash"
-    code="google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/pen-debug-profile --no-first-run &"
-  />
-
-  <p>
-    Verify: <code>http://localhost:9222/json</code> should return a JSON array of
-    open tabs.
-  </p>
-
-  <p>
-    <strong>Why <code>--user-data-dir</code>?</strong> Chrome’s
-    <code>--remote-debugging-port</code>
-    flag is silently ignored when Chrome is already running. Using
-    <code>--user-data-dir</code>
-    forces a separate instance that works alongside your existing browser — no need
-    to close anything.
-  </p>
-
   <h2 id="ide-config">IDE Config</h2>
 
   <p>
-    Your editor spawns PEN as a child process. Set it up once, then forget it.
+    <code>pen init</code> writes this for you. If you need to do it manually:
   </p>
 
   <p><strong>VS Code</strong> — <code>.vscode/mcp.json</code>:</p>
@@ -175,16 +91,13 @@ pen --allow-eval --project-root /my/project`}
   "servers": {
     "pen": {
       "command": "pen",
-      "args": ["--auto-launch", "--project-root", "\${workspaceFolder}"]
+      "args": ["--project-root", "\${workspaceFolder}"]
     }
   }
 }`}
   />
 
-  <p>
-    <strong>Cursor</strong> — <code>.cursor/mcp.json</code> in your project (or
-    <code>~/.cursor/mcp.json</code> for global):
-  </p>
+  <p><strong>Cursor</strong> — <code>.cursor/mcp.json</code>:</p>
 
   <CodeBlock
     lang="json"
@@ -192,7 +105,7 @@ pen --allow-eval --project-root /my/project`}
   "mcpServers": {
     "pen": {
       "command": "pen",
-      "args": ["--auto-launch", "--project-root", "\${workspaceFolder}"]
+      "args": ["--project-root", "\${workspaceFolder}"]
     }
   }
 }`}
@@ -201,8 +114,7 @@ pen --allow-eval --project-root /my/project`}
   <p>
     <strong>Claude Desktop</strong> —
     <code>~/Library/Application Support/Claude/claude_desktop_config.json</code>
-    (macOS) or
-    <code>%APPDATA%\Claude\claude_desktop_config.json</code> (Windows):
+    (macOS) or <code>%APPDATA%\Claude\claude_desktop_config.json</code> (Windows):
   </p>
 
   <CodeBlock
@@ -211,32 +123,46 @@ pen --allow-eval --project-root /my/project`}
   "mcpServers": {
     "pen": {
       "command": "pen",
-      "args": ["--auto-launch", "--project-root", "/absolute/path/to/project"]
+      "args": ["--project-root", "/absolute/path/to/project"]
     }
   }
 }`}
   />
 
-  <h2 id="building-from-source">Building from Source</h2>
+  <h2 id="browser-setup">Browser Setup</h2>
+
+  <p>
+    By default (<code>--auto-launch=true</code>), PEN launches a separate debug
+    browser automatically. Your existing browser is untouched — different
+    profile, different process.
+  </p>
+
+  <p>To launch manually instead:</p>
 
   <CodeBlock
     lang="bash"
-    code={`git clone https://github.com/edbnme/pen.git && cd pen
-go build -o pen ./cmd/pen        # Linux / macOS
-go build -o pen.exe ./cmd/pen    # Windows`}
-  />
+    code={`# macOS
+open -a "Google Chrome" --args --remote-debugging-port=9222 --user-data-dir=/tmp/pen-debug --no-first-run
 
-  <p>Requires Go 1.24+. Dependencies download automatically.</p>
+# Windows
+& "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9222 --user-data-dir="$env:TEMP\\pen-debug" --no-first-run
 
-  <h3 id="production-build">Production Build</h3>
-
-  <CodeBlock
-    lang="bash"
-    code="go build -ldflags &quot;-s -w -X main.version=v1.0.0&quot; -o pen ./cmd/pen"
+# Linux
+google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/pen-debug --no-first-run &`}
   />
 
   <p>
-    Cross-compiled via GoReleaser for linux/darwin/windows on amd64 and arm64.
+    Use <code>--user-data-dir</code> so it runs alongside your regular browser.
+    Verify with <code>http://localhost:9222/json</code>.
+  </p>
+
+  <h2 id="http-transport">HTTP Transport</h2>
+
+  <CodeBlock lang="bash" code="pen --transport http --addr localhost:6100" />
+
+  <p>
+    Serves MCP at <code>http://localhost:6100/mcp</code>. Use this for
+    shared or remote setups instead of stdio.
   </p>
 
   <h2 id="docker">Docker</h2>
@@ -255,19 +181,7 @@ COPY --from=builder /app/pen /usr/local/bin/pen
 CMD ["sh", "-c", "google-chrome --headless --no-sandbox --disable-gpu --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 & sleep 2 && exec pen --cdp-url http://127.0.0.1:9222"]`}
   />
 
-  <p>
-    For real deployments, use a process manager (supervisord, etc.) instead of
-    backgrounding Chrome with <code>&</code>.
-  </p>
-
-  <h2 id="server--ci">Server / CI</h2>
-
-  <p>
-    CDP is locked to localhost on purpose. That's a security choice, not a
-    limitation.
-  </p>
-
-  <h3 id="headless-chrome">Headless Chrome</h3>
+  <h2 id="ci--headless">CI / Headless</h2>
 
   <CodeBlock
     lang="bash"
@@ -276,17 +190,12 @@ CMD ["sh", "-c", "google-chrome --headless --no-sandbox --disable-gpu --remote-d
 pen --cdp-url http://127.0.0.1:9222`}
   />
 
-  <h3 id="ssh-tunnel">SSH Tunnel</h3>
+  <p>
+    For remote browsers, tunnel with SSH:
+    <code>ssh -L 9222:localhost:9222 user@server</code>
+  </p>
 
-  <p>Forward a remote CDP port to localhost:</p>
-
-  <CodeBlock
-    lang="bash"
-    code={`ssh -L 9222:localhost:9222 user@server
-pen --cdp-url http://localhost:9222`}
-  />
-
-  <h3 id="security-notes">Security Notes</h3>
+  <h2 id="security-notes">Security Notes</h2>
 
   <ul>
     <li>Never expose port 9222 to the network</li>
@@ -295,17 +204,12 @@ pen --cdp-url http://localhost:9222`}
     <li>Always set <code>--project-root</code> in production</li>
   </ul>
 
-  <h2 id="optional-lighthouse-cli">Optional: Lighthouse CLI</h2>
+  <h2 id="lighthouse">Lighthouse</h2>
 
   <p>
-    The <code>pen_lighthouse</code> tool shells out to the Lighthouse CLI for full
-    audits. Install it separately:
+    <code>pen_lighthouse</code> needs the Lighthouse CLI. All other tools work
+    without it.
   </p>
 
   <CodeBlock lang="bash" code="npm install -g lighthouse" />
-
-  <p>
-    If Lighthouse isn't installed, every other PEN tool still works fine. Only
-    <code>pen_lighthouse</code> needs it.
-  </p>
 </DocPage>

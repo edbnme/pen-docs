@@ -22,8 +22,8 @@
   </p>
 
   <p>
-    One Go binary. No Node.js. No browser launch. Just attach to your running
-    browser.
+    One Go binary. No Node.js. Auto-launches a debug browser or attaches to one
+    you're already running.
   </p>
 
   <h2 id="how-it-works">How It Works</h2>
@@ -195,8 +195,9 @@ scoop bucket add pen https://github.com/edbnme/scoop-pen && scoop install pen  #
         </tr>
         <tr>
           <td>CDP</td>
-          <td>Attach to existing browser</td>
-          <td>Never launches a browser — your dev browser is already running</td
+          <td>Auto-launch or attach</td>
+          <td
+            >Launches a separate debug browser, or attaches to an existing one</td
           >
         </tr>
         <tr>

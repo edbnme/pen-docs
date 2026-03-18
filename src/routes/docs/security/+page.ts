@@ -33,7 +33,7 @@ export const load = () => ({
       text: "Gate 7: Temp File Isolation",
       depth: 2,
     },
-    { id: "gate-8-http-transport", text: "Gate 8: HTTP Transport", depth: 2 },
+    { id: "gate-8-size-caps", text: "Gate 8: Size Caps", depth: 2 },
     { id: "attack-scenarios", text: "Attack Scenarios", depth: 2 },
     { id: "security-checklist", text: "Security Checklist", depth: 2 },
     { id: "recommendations", text: "Recommendations", depth: 2 },
