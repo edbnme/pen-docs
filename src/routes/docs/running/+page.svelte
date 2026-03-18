@@ -1,6 +1,7 @@
 <script lang="ts">
   import DocPage from "$lib/content/DocPage.svelte";
   import CodeBlock from "$lib/content/CodeBlock.svelte";
+  import Details from "$lib/content/Details.svelte";
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();
@@ -16,8 +17,8 @@
 
   <p>
     Your IDE spawns PEN automatically via the MCP config that
-    <code>pen init</code> wrote. You don't run PEN by hand unless you're using
-    HTTP transport or debugging.
+    <code>pen init</code> wrote. You don't run PEN by hand unless you're using HTTP
+    transport or debugging.
   </p>
 
   <h2 id="flags">Flags</h2>
@@ -53,6 +54,12 @@
           ></tr
         >
         <tr
+          ><td><code>--stateless</code></td><td><code>false</code></td><td
+            >Disable session tracking for HTTP transport (no
+            <code>Mcp-Session-Id</code> required)</td
+          ></tr
+        >
+        <tr
           ><td><code>--auto-launch</code></td><td><code>true</code></td><td
             >Auto-launch a debug browser if CDP not found</td
           ></tr
@@ -80,14 +87,13 @@
   <h2 id="ide-config">IDE Config</h2>
 
   <p>
-    <code>pen init</code> writes this for you. If you need to do it manually:
+    <code>pen init</code> writes this for you. Manual setup if needed:
   </p>
 
-  <p><strong>VS Code</strong> — <code>.vscode/mcp.json</code>:</p>
-
-  <CodeBlock
-    lang="json"
-    code={`{
+  <Details summary="VS Code — .vscode/mcp.json">
+    <CodeBlock
+      lang="json"
+      code={`{
   "servers": {
     "pen": {
       "command": "pen",
@@ -95,13 +101,13 @@
     }
   }
 }`}
-  />
+    />
+  </Details>
 
-  <p><strong>Cursor</strong> — <code>.cursor/mcp.json</code>:</p>
-
-  <CodeBlock
-    lang="json"
-    code={`{
+  <Details summary="Cursor — .cursor/mcp.json">
+    <CodeBlock
+      lang="json"
+      code={`{
   "mcpServers": {
     "pen": {
       "command": "pen",
@@ -109,17 +115,19 @@
     }
   }
 }`}
-  />
+    />
+  </Details>
 
-  <p>
-    <strong>Claude Desktop</strong> —
-    <code>~/Library/Application Support/Claude/claude_desktop_config.json</code>
-    (macOS) or <code>%APPDATA%\Claude\claude_desktop_config.json</code> (Windows):
-  </p>
-
-  <CodeBlock
-    lang="json"
-    code={`{
+  <Details summary="Claude Desktop">
+    <p>
+      macOS: <code
+        >~/Library/Application Support/Claude/claude_desktop_config.json</code
+      ><br />
+      Windows: <code>%APPDATA%\Claude\claude_desktop_config.json</code>
+    </p>
+    <CodeBlock
+      lang="json"
+      code={`{
   "mcpServers": {
     "pen": {
       "command": "pen",
@@ -127,21 +135,20 @@
     }
   }
 }`}
-  />
+    />
+  </Details>
 
   <h2 id="browser-setup">Browser Setup</h2>
 
   <p>
     By default (<code>--auto-launch=true</code>), PEN launches a separate debug
-    browser automatically. Your existing browser is untouched — different
-    profile, different process.
+    browser automatically. Your existing browser is untouched.
   </p>
 
-  <p>To launch manually instead:</p>
-
-  <CodeBlock
-    lang="bash"
-    code={`# macOS
+  <Details summary="Manual browser launch commands">
+    <CodeBlock
+      lang="bash"
+      code={`# macOS
 open -a "Google Chrome" --args --remote-debugging-port=9222 --user-data-dir=/tmp/pen-debug --no-first-run
 
 # Windows
@@ -149,27 +156,28 @@ open -a "Google Chrome" --args --remote-debugging-port=9222 --user-data-dir=/tmp
 
 # Linux
 google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/pen-debug --no-first-run &`}
-  />
-
-  <p>
-    Use <code>--user-data-dir</code> so it runs alongside your regular browser.
-    Verify with <code>http://localhost:9222/json</code>.
-  </p>
+    />
+    <p>
+      Use <code>--user-data-dir</code> so it runs alongside your regular
+      browser. Verify with <code>http://localhost:9222/json</code>.
+    </p>
+  </Details>
 
   <h2 id="http-transport">HTTP Transport</h2>
 
   <CodeBlock lang="bash" code="pen --transport http --addr localhost:6100" />
 
   <p>
-    Serves MCP at <code>http://localhost:6100/mcp</code>. Use this for
-    shared or remote setups instead of stdio.
+    Serves MCP at <code>http://localhost:6100/mcp</code>. Use this for shared or
+    remote setups instead of stdio.
   </p>
 
-  <h2 id="docker">Docker</h2>
+  <h2 id="docker">Docker &amp; CI</h2>
 
-  <CodeBlock
-    lang="dockerfile"
-    code={`FROM golang:1.24-bookworm AS builder
+  <Details summary="Docker setup">
+    <CodeBlock
+      lang="dockerfile"
+      code={`FROM golang:1.24-bookworm AS builder
 WORKDIR /app
 COPY . .
 RUN go build -o pen ./cmd/pen
@@ -179,21 +187,21 @@ RUN apt-get update && apt-get install -y google-chrome-stable --no-install-recom
     && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/pen /usr/local/bin/pen
 CMD ["sh", "-c", "google-chrome --headless --no-sandbox --disable-gpu --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 & sleep 2 && exec pen --cdp-url http://127.0.0.1:9222"]`}
-  />
+    />
+  </Details>
 
-  <h2 id="ci--headless">CI / Headless</h2>
-
-  <CodeBlock
-    lang="bash"
-    code={`google-chrome --headless --no-sandbox --disable-gpu \\
+  <Details summary="Headless / CI">
+    <CodeBlock
+      lang="bash"
+      code={`google-chrome --headless --no-sandbox --disable-gpu \\
   --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 &
 pen --cdp-url http://127.0.0.1:9222`}
-  />
-
-  <p>
-    For remote browsers, tunnel with SSH:
-    <code>ssh -L 9222:localhost:9222 user@server</code>
-  </p>
+    />
+    <p>
+      For remote browsers, tunnel with SSH:
+      <code>ssh -L 9222:localhost:9222 user@server</code>
+    </p>
+  </Details>
 
   <h2 id="security-notes">Security Notes</h2>
 
@@ -207,8 +215,8 @@ pen --cdp-url http://127.0.0.1:9222`}
   <h2 id="lighthouse">Lighthouse</h2>
 
   <p>
-    <code>pen_lighthouse</code> needs the Lighthouse CLI. All other tools work
-    without it.
+    <code>pen_lighthouse</code> needs the Lighthouse CLI. All other tools work without
+    it.
   </p>
 
   <CodeBlock lang="bash" code="npm install -g lighthouse" />

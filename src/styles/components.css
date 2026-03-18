@@ -75,3 +75,25 @@
 :focus-visible {
   @apply outline-2 outline-offset-2 outline-blue-500/50 rounded-sm;
 }
+
+/* Collapsible details/summary */
+.prose .details-dropdown {
+  @apply my-4 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden;
+}
+.prose .details-dropdown summary {
+  @apply px-4 py-3 cursor-pointer select-none font-medium text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/60 hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors list-none;
+}
+.prose .details-dropdown summary::marker,
+.prose .details-dropdown summary::-webkit-details-marker {
+  display: none;
+}
+.prose .details-dropdown summary::before {
+  content: "▸ ";
+  @apply mr-1.5 text-gray-400 dark:text-gray-500 inline-block transition-transform duration-200;
+}
+.prose .details-dropdown[open] summary::before {
+  content: "▾ ";
+}
+.prose .details-dropdown .details-content {
+  @apply px-4 pb-4 pt-2;
+}

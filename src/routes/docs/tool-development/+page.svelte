@@ -134,11 +134,12 @@
 
   <CodeBlock
     lang="go"
-    code={`var myTool = mcp.Tool{
+    code={`var myTool = &mcp.Tool{
     Name:        "pen_my_tool",
     Description: "What this tool does in one sentence. Used by LLMs to decide when to call it.",
     Annotations: &mcp.ToolAnnotations{
-        ReadOnlyHint: boolPtr(true), // or false if it modifies state
+        Title:        "My Tool",
+        ReadOnlyHint: true, // bool, not a pointer
     },
 }`}
   />

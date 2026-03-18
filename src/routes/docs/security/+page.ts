@@ -34,6 +34,11 @@ export const load = () => ({
       depth: 2,
     },
     { id: "gate-8-size-caps", text: "Gate 8: Size Caps", depth: 2 },
+    {
+      id: "gate-9-http-transport",
+      text: "Gate 9: HTTP Transport",
+      depth: 2,
+    },
     { id: "attack-scenarios", text: "Attack Scenarios", depth: 2 },
     { id: "security-checklist", text: "Security Checklist", depth: 2 },
     { id: "recommendations", text: "Recommendations", depth: 2 },

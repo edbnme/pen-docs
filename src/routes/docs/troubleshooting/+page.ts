@@ -38,5 +38,10 @@ export const load = () => ({
       depth: 2,
     },
     { id: "security-issues", text: "Security Issues", depth: 2 },
+    {
+      id: "http-transport-issues",
+      text: "HTTP Transport Issues",
+      depth: 2,
+    },
   ],
 });

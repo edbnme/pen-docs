@@ -79,10 +79,11 @@
     CDP:     cdpClient,
     Locks:   pen.Locks(),
     Limiter: security.NewRateLimiter(security.DefaultCooldowns),
-    Config:  &tools.ToolsConfig{
+    Config: &tools.ToolsConfig{
         AllowEval:   *allowEval,
         ProjectRoot: *projectRoot,
         Version:     version,
+        CDPPort:     parseCDPPort(*cdpURL),
     },
 })`}
   />
@@ -160,7 +161,7 @@
         >
         <tr
           ><td>HTTP</td><td><code>--transport http</code></td><td
-            >Streamable HTTP (stateful sessions)</td
+            >Streamable HTTP; add <code>--stateless</code> to disable session tracking</td
           ></tr
         >
       </tbody>

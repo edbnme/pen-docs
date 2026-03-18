@@ -360,4 +360,79 @@ pen --cdp-url http://localhost:9222`}
     <strong>Fix:</strong> Set <code>--project-root</code> to the correct directory,
     or access files within the allowed path.
   </p>
+
+  <h2 id="http-transport-issues">HTTP Transport Issues</h2>
+
+  <h3>Session not found / tools not working</h3>
+
+  <p>
+    <strong>Symptom:</strong> Tools return errors or each request starts a new session.
+  </p>
+
+  <p>
+    <strong>Fix:</strong> You must send an <code>initialize</code> request
+    first, then include the <code>Mcp-Session-Id</code> header from the response in
+    all subsequent requests. Without it, each POST creates a new session.
+  </p>
+
+  <CodeBlock
+    lang="bash"
+    code={`# 1. Initialize — save the session ID from the response header
+curl -s http://localhost:6100/mcp \\
+  -H "Content-Type: application/json" \\
+  -H "Accept: application/json, text/event-stream" \\
+  -D - \\
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","clientInfo":{"name":"test"},"capabilities":{}}}'
+
+# 2. Use the Mcp-Session-Id from step 1 in all subsequent requests
+curl -s http://localhost:6100/mcp \\
+  -H "Content-Type: application/json" \\
+  -H "Accept: application/json, text/event-stream" \\
+  -H "Mcp-Session-Id: YOUR_SESSION_ID" \\
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"pen_status","arguments":{}}}'`}
+  />
+
+  <h3>SSE response format</h3>
+
+  <p>
+    <strong>Symptom:</strong> Response looks like <code>event: message</code> /
+    <code>data: ...</code> instead of plain JSON.
+  </p>
+
+  <p>
+    <strong>Cause:</strong> MCP Streamable HTTP uses Server-Sent Events. Each
+    response is prefixed with <code>event: message\ndata: </code>. This is the
+    correct format — your client needs to parse SSE.
+  </p>
+
+  <p>
+    <strong>Tip:</strong> Use <code>--stateless</code> flag for simpler testing. In
+    stateless mode, no session ID tracking is needed.
+  </p>
+
+  <h3>Port already in use</h3>
+
+  <p>
+    <strong>Symptom:</strong>
+    <code>bind: address already in use</code>
+  </p>
+
+  <p>
+    <strong>Fix:</strong> A previous PEN instance is still running. Kill it, or use
+    a different port:
+  </p>
+
+  <CodeBlock
+    lang="bash"
+    code={`# Windows — find and kill the process
+netstat -ano | findstr :6100
+taskkill /PID <pid> /F
+
+# macOS/Linux
+lsof -i :6100
+kill <pid>
+
+# Or just use a different port
+pen --transport http --addr localhost:6200`}
+  />
 </DocPage>

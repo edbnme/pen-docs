@@ -1,6 +1,7 @@
 <script lang="ts">
   import DocPage from "$lib/content/DocPage.svelte";
   import CodeBlock from "$lib/content/CodeBlock.svelte";
+  import Details from "$lib/content/Details.svelte";
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();
@@ -44,46 +45,45 @@ pen init`}
 
   <h2 id="other-install-methods">Other Install Methods</h2>
 
-  <h3 id="homebrew">Homebrew (macOS / Linux)</h3>
+  <Details summary="Homebrew (macOS / Linux)">
+    <CodeBlock lang="bash" code="brew install edbnme/tap/pen" />
+  </Details>
 
-  <CodeBlock lang="bash" code="brew install edbnme/tap/pen" />
-
-  <h3 id="scoop">Scoop (Windows)</h3>
-
-  <CodeBlock
-    lang="powershell"
-    code={`scoop bucket add pen https://github.com/edbnme/scoop-pen
+  <Details summary="Scoop (Windows)">
+    <CodeBlock
+      lang="powershell"
+      code={`scoop bucket add pen https://github.com/edbnme/scoop-pen
 scoop install pen`}
-  />
+    />
+  </Details>
 
-  <h3 id="go-install">go install</h3>
+  <Details summary="go install">
+    <CodeBlock
+      lang="bash"
+      code="go install github.com/edbnme/pen/cmd/pen@latest"
+    />
+    <p>Requires Go 1.24+.</p>
+  </Details>
 
-  <CodeBlock
-    lang="bash"
-    code="go install github.com/edbnme/pen/cmd/pen@latest"
-  />
+  <Details summary="GitHub Releases">
+    <p>
+      Download from
+      <a
+        href="https://github.com/edbnme/pen/releases/latest"
+        target="_blank"
+        rel="noopener noreferrer">Releases</a
+      >, extract, and put it on your <code>PATH</code>.
+    </p>
+  </Details>
 
-  <p>Requires Go 1.24+.</p>
-
-  <h3 id="github-releases">GitHub Releases</h3>
-
-  <p>
-    Download the latest binary from
-    <a
-      href="https://github.com/edbnme/pen/releases/latest"
-      target="_blank"
-      rel="noopener noreferrer">Releases</a
-    >, extract, and put it on your <code>PATH</code>.
-  </p>
-
-  <h3 id="from-source">From Source</h3>
-
-  <CodeBlock
-    lang="bash"
-    code={`git clone https://github.com/edbnme/pen.git && cd pen
+  <Details summary="From Source">
+    <CodeBlock
+      lang="bash"
+      code={`git clone https://github.com/edbnme/pen.git && cd pen
 go build -o pen ./cmd/pen        # Linux / macOS
 go build -o pen.exe ./cmd/pen    # Windows`}
-  />
+    />
+  </Details>
 
   <h2 id="verify">Verify</h2>
 

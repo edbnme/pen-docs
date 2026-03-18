@@ -125,10 +125,12 @@ internal/
 
   <Mermaid
     code={`flowchart TD
-    Start([pen starts]) --> InitCheck{args 1 = init?}
-    InitCheck -->|Yes| Wizard["Run interactive wizard<br>(charmbracelet/huh)"]
+    Start([pen starts]) --> SubCheck{subcommand?}
+    SubCheck -->|"pen init"| Wizard["Run interactive wizard<br>(charmbracelet/huh)"]
+    SubCheck -->|"pen update"| Updater["Self-update to latest release"]
     Wizard --> Done([Exit])
-    InitCheck -->|No| Flags[Parse flags]
+    Updater --> Done
+    SubCheck -->|"(none)"| Flags[Parse flags]
     Flags --> Validate["Validate CDP URL<br>(localhost-only)"]
     Validate --> Signal["Set up signal context<br>(SIGINT, SIGTERM)"]
     Signal --> Connect["Create CDP client + reconnect<br>(3 retries, exponential backoff)"]
@@ -141,13 +143,14 @@ internal/
 
   <ol>
     <li>
-      Check for the <code>"init"</code> subcommand — if present, run the interactive
-      wizard
+      Check for subcommands — <code>pen init</code> runs the interactive wizard,
+      <code>pen update</code> self-updates to the latest release
     </li>
     <li>
       Parse flags (<code>--cdp-url</code>, <code>--transport</code>,
-      <code>--addr</code>, <code>--allow-eval</code>,
-      <code>--project-root</code>, <code>--log-level</code>)
+      <code>--addr</code>, <code>--allow-eval</code>, <code>--stateless</code>,
+      <code>--auto-launch</code>, <code>--project-root</code>,
+      <code>--log-level</code>, <code>--version</code>)
     </li>
     <li>
       Validate the CDP URL via <code>security.ValidateCDPURL</code> (localhost only)
@@ -210,6 +213,8 @@ func (c *Client) Connect(ctx context.Context) error
 func (c *Client) Close()
 func (c *Client) Reconnect(ctx context.Context, maxAttempts int) error
 func (c *Client) IsConnected() bool
+func (c *Client) SetLogger(logger *slog.Logger)
+func (c *Client) SetReconnectFunc(fn func() error)
 
 // Context access
 func (c *Client) Context() (context.Context, error)
@@ -241,6 +246,7 @@ func DiscoverEndpoint(ctx context.Context, baseURL string) (string, error)`}
     Transport string
     HTTPAddr  string
     AllowEval bool
+    Stateless bool
     Logger    *slog.Logger
 }
 
@@ -412,7 +418,12 @@ defer release()`}
           ></tr
         >
         <tr
-          ><td>Trace file max size</td><td>100 MB</td><td
+          ><td>Trace capture hard cap</td><td>500 MB</td><td
+            ><code>tools/cpu.go</code></td
+          ></tr
+        >
+        <tr
+          ><td>Trace insights file size limit</td><td>100 MB</td><td
             ><code>tools/cpu.go</code></td
           ></tr
         >
