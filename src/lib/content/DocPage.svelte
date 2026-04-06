@@ -63,7 +63,7 @@
 <div
   class="flex gap-10 max-w-6xl mx-auto px-5 sm:px-8 lg:px-10 py-10 lg:py-16 fade-in"
 >
-  <article class="prose min-w-0 flex-1 max-w-[52rem]">
+  <article class="prose min-w-0 flex-1 max-w-208">
     <div class="flex items-start justify-between gap-4 mb-2">
       <div class="flex-1 min-w-0"></div>
       <CopyPageButton {title} {description} />

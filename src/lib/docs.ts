@@ -50,6 +50,13 @@ export const docs: DocEntry[] = [
       "Fix common PEN issues: connection errors, rate limits, domain locks, and IDE setup.",
   },
   {
+    slug: "comparison",
+    title: "Comparison",
+    section: "Users",
+    description:
+      "How PEN compares to Playwright MCP, BrowserTools MCP, Lighthouse CLI, and other browser tools.",
+  },
+  {
     slug: "security",
     title: "Security",
     section: "Users",
@@ -117,6 +124,10 @@ export const docs: DocEntry[] = [
 ];
 
 export const docOrder = docs.map((d) => d.slug);
+
+export function getDocPath(slug: string): string {
+  return `/docs/${slug}`;
+}
 
 export function getDocBySlug(slug: string): DocEntry | undefined {
   return docs.find((d) => d.slug === slug);

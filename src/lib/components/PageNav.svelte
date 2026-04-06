@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { resolveRoute } from "$app/paths";
   import { goto } from "$app/navigation";
-  import { getAdjacentDocs } from "$lib/docs";
+  import { getAdjacentDocs, getDocPath } from "$lib/docs";
 
   let { slug }: { slug: string } = $props();
   let adjacent = $derived(getAdjacentDocs(slug));
@@ -9,11 +8,11 @@
   function onKeydown(e: KeyboardEvent) {
     if (e.altKey && e.key === "ArrowLeft" && adjacent.prev) {
       e.preventDefault();
-      goto(`/docs/${adjacent.prev.slug}`);
+      goto(getDocPath(adjacent.prev.slug));
     }
     if (e.altKey && e.key === "ArrowRight" && adjacent.next) {
       e.preventDefault();
-      goto(`/docs/${adjacent.next.slug}`);
+      goto(getDocPath(adjacent.next.slug));
     }
   }
 </script>
@@ -27,8 +26,8 @@
   >
     {#if adjacent.prev}
       <a
-        href={resolveRoute("/docs/[slug]", { slug: adjacent.prev.slug })}
-        class="group flex flex-col gap-1.5 p-5 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-sm hover:shadow-gray-900/[0.04] dark:hover:shadow-none transition-all duration-200"
+        href={getDocPath(adjacent.prev.slug)}
+        class="group flex flex-col gap-1.5 p-5 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-sm hover:shadow-gray-900/4 dark:hover:shadow-none transition-all duration-200"
       >
         <span
           class="text-[0.6875rem] uppercase tracking-wider text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300"
@@ -45,8 +44,8 @@
 
     {#if adjacent.next}
       <a
-        href={resolveRoute("/docs/[slug]", { slug: adjacent.next.slug })}
-        class="group flex flex-col items-end gap-1.5 p-5 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-sm hover:shadow-gray-900/[0.04] dark:hover:shadow-none transition-all duration-200"
+        href={getDocPath(adjacent.next.slug)}
+        class="group flex flex-col items-end gap-1.5 p-5 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-sm hover:shadow-gray-900/4 dark:hover:shadow-none transition-all duration-200"
       >
         <span
           class="text-[0.6875rem] uppercase tracking-wider text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300"

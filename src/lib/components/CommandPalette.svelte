@@ -75,7 +75,7 @@
 {#if open}
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
-    class="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]"
+    class="fixed inset-0 z-100 flex items-start justify-center pt-[15vh]"
     onkeydown={onKeydown}
   >
     <button
@@ -132,8 +132,8 @@
             <button
               class="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors duration-150 {i ===
               selectedIndex
-                ? 'bg-gray-100 dark:bg-white/[0.06] text-gray-900 dark:text-gray-100'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03]'}"
+                ? 'bg-gray-100 dark:bg-white/6 text-gray-900 dark:text-gray-100'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/3'}"
               onclick={() => navigate(doc)}
               onmouseenter={() => (selectedIndex = i)}
             >

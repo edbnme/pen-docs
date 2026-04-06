@@ -14,10 +14,64 @@
   <h1>Tool Reference</h1>
 
   <p>
-    PEN ships with 30 tools in 9 categories. Every tool follows MCP conventions:
-    auto-generated <code>inputSchema</code> from Go structs, text output, and
+    PEN ships with 31 tools in 10 categories. Every tool follows MCP
+    conventions: auto-generated <code>inputSchema</code> from Go structs, text
+    output, and
     <code>isError: true</code> on failure.
   </p>
+
+  <!-- ─── Workflow ─── -->
+  <h2 id="workflow-1-tool">Workflow (1 tool)</h2>
+
+  <h3 id="pen_workflow"><code>pen_workflow</code></h3>
+  <p>
+    Run a guided PEN workflow without manually chaining the underlying tools.
+  </p>
+  <div class="table-wrapper">
+    <table>
+      <thead
+        ><tr><th>Param</th><th>Type</th><th>Default</th><th>Description</th></tr
+        ></thead
+      >
+      <tbody>
+        <tr
+          ><td><code>name</code></td><td>string</td><td>—</td><td
+            >Workflow name: <code>slow-page-triage</code>,
+            <code>js-bloat-check</code>, or <code>accessibility-pass</code></td
+          ></tr
+        >
+        <tr
+          ><td><code>url</code></td><td>string</td><td>current page</td><td
+            >Optional URL to navigate to before the workflow runs</td
+          ></tr
+        >
+        <tr
+          ><td><code>waitMs</code></td><td>int</td><td>3000</td><td
+            >Milliseconds to wait for settling and vitals collection</td
+          ></tr
+        >
+        <tr
+          ><td><code>duration</code></td><td>int</td><td>5</td><td
+            >Optional CPU profiling duration in seconds for performance
+            workflows</td
+          ></tr
+        >
+        <tr
+          ><td><code>selector</code></td><td>string</td><td>—</td><td
+            >Optional selector used by <code>accessibility-pass</code></td
+          ></tr
+        >
+      </tbody>
+    </table>
+  </div>
+  <p>
+    <code>pen_workflow</code> reuses typed helpers from network capture, JS coverage,
+    Web Vitals, CPU profiling, and accessibility scanning. It returns a workflow verdict,
+    key findings, workflow notes when some evidence could not be collected, and recommended
+    next steps.
+  </p>
+
+  <hr />
 
   <!-- ─── Memory ─── -->
   <h2 id="memory-4-tools">Memory (4 tools)</h2>
@@ -439,8 +493,8 @@
       >
       <tbody>
         <tr
-          ><td><code>waitForLCP</code></td><td>bool</td><td>true</td><td
-            >Wait for LCP to stabilize</td
+          ><td><code>waitMs</code></td><td>int</td><td>3000</td><td
+            >Milliseconds to wait for metric collection to stabilize</td
           ></tr
         >
       </tbody>

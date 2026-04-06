@@ -177,7 +177,7 @@
   onclick={copyForLLM}
   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[0.75rem] font-medium rounded-lg border transition-all duration-200 cursor-pointer {copied
     ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/40'
-    : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 bg-transparent hover:bg-gray-100 dark:hover:bg-white/[0.04] border-gray-200 dark:border-gray-800/60 hover:border-gray-300 dark:hover:border-gray-700'}"
+    : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 bg-transparent hover:bg-gray-100 dark:hover:bg-white/4 border-gray-200 dark:border-gray-800/60 hover:border-gray-300 dark:hover:border-gray-700'}"
   aria-label="Copy page content for LLM"
 >
   {#if copied}

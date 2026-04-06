@@ -15,10 +15,64 @@
   <h1>Workflows</h1>
 
   <p>
-    PEN tools chain together naturally. The LLM decides what to run and in what
-    order — PEN doesn't enforce any particular flow. These are patterns that
-    work well for common investigations.
+    PEN now exposes a workflow-first entry point for the most common debugging
+    loops, and the lower-level tools still chain together naturally when you
+    need a more manual investigation. Start with <code>pen_workflow</code> when you
+    want guided verdicts and next steps, then fall back to the manual patterns below
+    when you need finer control.
   </p>
+
+  <h2 id="workflow-first-entry-points">Workflow-First Entry Points</h2>
+
+  <h3 id="slow-page-triage"><code>slow-page-triage</code></h3>
+
+  <Mermaid
+    code={`flowchart LR
+    A["pen_workflow\n(name=slow-page-triage)"] --> B["JS coverage"]
+    A --> C["Core Web Vitals"]
+    A --> D["CPU profile"]
+    A --> E["Network capture"]`}
+  />
+
+  <p>
+    Use this when a page feels slow and you need one pass across startup cost,
+    render-blocking resources, Web Vitals, and CPU hotspots. The workflow
+    returns a single verdict plus the most likely next step instead of leaving
+    the LLM to infer the chain from raw outputs.
+  </p>
+
+  <h3 id="js-bloat-check"><code>js-bloat-check</code></h3>
+
+  <Mermaid
+    code={`flowchart LR
+    A["pen_workflow\n(name=js-bloat-check)"] --> B["JS coverage"]
+    A --> C["Optional CPU profile"]
+    B --> D["Unused bytes + top wasteful scripts"]`}
+  />
+
+  <p>
+    Use this when you suspect oversized bundles, weak code splitting, or scripts
+    that load far more code than they use. When a URL is provided, the workflow
+    starts coverage before navigation so the result reflects page-load
+    JavaScript, not just idle runtime state.
+  </p>
+
+  <h3 id="accessibility-pass"><code>accessibility-pass</code></h3>
+
+  <Mermaid
+    code={`flowchart LR
+    A["pen_workflow\n(name=accessibility-pass)"] --> B["Quick accessibility scan"]
+    B --> C["Verdict + issue summary + next steps"]`}
+  />
+
+  <p>
+    Use this when you want a fast accessibility sweep for missing alt text,
+    unlabeled controls, heading-order problems, and missing document language.
+    It is intentionally lightweight and still points you back to Lighthouse and
+    manual keyboard or screen-reader testing for deeper validation.
+  </p>
+
+  <h2 id="manual-investigation-patterns">Manual Investigation Patterns</h2>
 
   <h2 id="memory-leak-investigation">Memory Leak Investigation</h2>
 

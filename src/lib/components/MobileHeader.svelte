@@ -12,7 +12,7 @@
 </script>
 
 <div
-  class="mobile-header lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/90 dark:bg-black/90 backdrop-blur-xl border-b border-gray-200/80 dark:border-gray-800/40 shadow-sm shadow-gray-900/[0.03] dark:shadow-none"
+  class="mobile-header lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/90 dark:bg-black/90 backdrop-blur-xl border-b border-gray-200/80 dark:border-gray-800/40 shadow-sm shadow-gray-900/3 dark:shadow-none"
 >
   <div class="flex items-center justify-between px-4 h-12">
     <button
